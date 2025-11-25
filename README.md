@@ -151,7 +151,7 @@ default.
 
 To make it easy to get started, a number of demonstration files are included: 
 
-* `demo_student_thesis.tex` for Bachelor and Master student theses
+* `student_thesis.tex.tex` for Bachelor and Master student theses
 * `demo_lith_lic.tex` for Licenciate theses at LiTH
 * `demo_filfak_lic.tex` for Licenciate theses at Filfak
 * `demo_lith_phd.tex` for PhD theses at LiTH
