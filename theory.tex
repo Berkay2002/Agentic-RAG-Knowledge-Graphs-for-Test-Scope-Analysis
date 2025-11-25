@@ -42,15 +42,15 @@ Despite these structural variations, the primary training objective remains \tex
 
 \subsection{Reasoning and Tool Use Capabilities}
 \label{sec:llm-capabilities}
-Beyond basic text generation, advanced LLMs exhibit significant capabilities relevant to agentic systems:
+Beyond basic text generation, advanced LLMs exhibit significant capabilities relevant to agentic systems \cite{shen2024llmwithtools}:
 \begin{itemize}
-    \item \textbf{Reasoning:} LLMs can engage in various forms of reasoning, from simple fact retrieval to more complex logical deduction. Techniques like \textit{Chain-of-Thought (CoT)} prompting guide LLMs to break down complex problems into intermediate steps, making their reasoning process more transparent and accurate.
+    \item \textbf{Reasoning:} LLMs can engage in various forms of reasoning, from simple fact retrieval to more complex logical deduction. Techniques like \textit{Chain-of-Thought (CoT)} prompting guide LLMs to break down complex problems into intermediate steps, making their reasoning process more transparent and accurate \cite{wei2022chainofthought}.
     \item \textbf{Tool Use:} A critical emergent capability is the ability of LLMs to interact with external tools or APIs. By learning to generate structured outputs (e.g., JSON function calls) in response to prompts, LLMs can extend their functionalities beyond their training data, enabling them to perform calculations, query databases, or access real-time information.
 \end{itemize}
 
 \subsection{Embeddings and Vector Space}
 \label{sec:embeddings}
-Central to many LLM applications, especially Retrieval-Augmented Generation, is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, images, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space. For text, this means words, phrases, or documents with similar meanings will have similar vector representations. This allows for efficient comparison and retrieval of semantically related information.
+Central to many LLM applications, especially Retrieval-Augmented Generation, is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, images, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space \cite{mikolov2013efficient}. For text, this means words, phrases, or documents with similar meanings will have similar vector representations. This allows for efficient comparison and retrieval of semantically related information.
 
 \section{Retrieval-Augmented Generation (The "Knowledge Provider")}
 \label{sec:rag}
