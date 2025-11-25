@@ -1,90 +1,97 @@
-%%% lorem.tex --- 
-%% 
-%% Filename: lorem.tex
-%% Description: 
-%% Author: Ola Leifler
-%% Maintainer: 
-%% Created: Wed Nov 10 09:59:23 2010 (CET)
-%% Version: $Id$
-%% Version: 
-%% Last-Updated: Tue Oct  4 11:58:17 2016 (+0200)
-%%           By: Ola Leifler
-%%     Update #: 7
-%% URL: 
-%% Keywords: 
-%% Compatibility: 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Commentary: 
-%% 
-%% 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Change log:
-%% 
-%% 
-%% RCS $Log$
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Code:
-
-\chapter{Theory}
+\chapter{Theoretical Framework}
 \label{cha:theory}
 
-The main purpose of this chapter is to make it obvious for
-the reader that the report authors have made an effort to read
-up on related research and other information of relevance for
-the research questions. It is a question of trust. Can I as a
-reader rely on what the authors are saying? If it is obvious
-that the authors know the topic area well and clearly present
-their lessons learned, it raises the perceived quality of the
-entire report.
+This chapter establishes the theoretical foundation for the agent-orchestrated Retrieval-Augmented Generation (RAG) and Knowledge Graph architecture developed in this thesis. It begins by grounding the problem in the context of modern software development practices and quality assurance, followed by an in-depth exploration of Large Language Models (LLMs), RAG, and AI Agents, including their constituent components and operational mechanisms.
 
-After having read the theory chapter it shall be obvious for
-the reader that the research questions are both well
-formulated and relevant.
+\section{Software Development Lifecycle & Quality Assurance}
+\label{sec:sdlc-qa}
 
-The chapter must contain theory of use for the intended
-study, both in terms of technique and method. If a final thesis
-project is about the development of a new search engine for
-a certain application domain, the theory must bring up related
-work on search algorithms and related techniques, but also
-methods for evaluating search engines, including
-performance measures such as precision, accuracy and
-recall.
+Modern software development is characterized by rapid iteration and continuous delivery, largely facilitated by Continuous Integration and Continuous Deployment (CI/CD) pipelines. These methodologies accelerate feature delivery but place significant demands on quality assurance, particularly in ensuring the reliability of complex systems through effective testing.
 
-The chapter shall be structured thematically, not per author.
-A good approach to making a review of scientific literature
-is to use \emph{Google Scholar} (which also has the useful function
-\emph{Cite}). By iterating between searching for articles and reading
-abstracts to find new terms to guide further searches, it is
-fairly straight forward to locate good and relevant
-information, such as \cite{test}.
+\subsection{Continuous Integration and Continuous Deployment (CI/CD)}
+\label{sec:cicd}
+CI/CD represents a set of practices that enable rapid and reliable software releases. Continuous Integration involves frequently merging code changes into a central repository, followed by automated builds and tests. Continuous Deployment extends this by automatically deploying verified changes to production. While highly efficient, CI/CD necessitates robust testing strategies to prevent the introduction of defects at an accelerated pace.
 
-Having found a relevant article one can use the function for
-viewing other articles that have cited this particular article,
-and also go through the article’s own reference list. Among
-these articles on can often find other interesting articles and
-thus proceed further.
+\subsection{Regression Testing and Test Scope Analysis}
+\label{sec:regression-test-scope}
+Central to quality assurance in CI/CD environments is regression testing, which ensures that new code changes do not adversely affect existing functionalities. However, re-running all tests for every small change is resource-intensive and impractical in large-scale systems. This gives rise to the critical challenge of \textit{test scope analysis}: the activity of intelligently determining the minimal set of legacy test cases relevant for verification when a new feature, change request, or defect fix is introduced. Effective test scope analysis balances the need for high test coverage with the efficiency of execution, preventing redundant tests while identifying potential gaps.
 
-It can also be a good idea to consider which sources seem
-most relevant for the problem area at hand. Are there any
-special conference or journal that often occurs one can search
-in more detail in lists of published articles from these venues
-in particular. One can also search for the web sites of
-important authors and investigate what they have published
-in general.
+\subsection{Traceability in Software Engineering}
+\label{sec:traceability}
+Software traceability refers to the ability to link related artifacts throughout the software development lifecycle, such as requirements to design, design to code, and code to test cases. Robust traceability is fundamental for effective test scope analysis, as it provides the explicit connections necessary to understand the impact of changes and identify corresponding verification activities. However, maintaining accurate and comprehensive traceability in large, evolving systems is a significant challenge.
 
-This chapter is called either \emph{Theory, Related Work}, or
-\emph{Related Research}. Check with your supervisor.
+\subsection{Observability, Evaluation, and Deployment}
+\label{sec:oevd}
+Beyond the core development and testing activities, the successful operation of complex software systems, especially those incorporating AI, relies on robust practices for observability, evaluation, and deployment.
+\begin{itemize}
+    \item \textbf{Observability:} Refers to the ability to infer the internal states of a system by examining its external outputs. In AI-driven systems, this is crucial for understanding how models and agents make decisions, identifying potential biases, and diagnosing issues in real-time.
+    \item \textbf{Evaluation:} Encompasses the methods and metrics used to assess a system's performance, accuracy, and overall effectiveness. For test scope analysis systems, this includes quantitative metrics such as precision and recall, as well as qualitative assessments of practical utility and explainability.
+    \item \textbf{Deployment:} Is the process of making the developed system available for use, ranging from local integration to large-scale production rollouts. For agentic systems, deployment strategies must consider integration with existing workflows, scalability, and maintenance.
+\end{itemize}
 
+\section{Large Language Models (The "Cognitive Core")}
+\label{sec:llms}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% lorem.tex ends here
+Large Language Models (LLMs) form the cognitive backbone of modern AI-driven applications, including agentic systems. These models are advanced neural networks trained on vast datasets of text, enabling them to understand, generate, and process human language with remarkable fluency.
 
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "demothesis"
-%%% End: 
+\subsection{Foundational Principles}
+\label{sec:llm-principles}
+At their core, LLMs are built upon the \textit{transformer architecture}, which allows them to process sequences of data (like words in a sentence) in parallel, capturing long-range dependencies more effectively than previous architectures. Their primary function is \textit{next-token prediction}: given a sequence of input tokens, the model predicts the most probable subsequent token. This seemingly simple task, scaled across billions of parameters and immense datasets, imbues LLMs with emergent capabilities such as understanding context, generating coherent text, and performing complex reasoning.
+
+\subsection{Reasoning and Tool Use Capabilities}
+\label{sec:llm-capabilities}
+Beyond basic text generation, advanced LLMs exhibit significant capabilities relevant to agentic systems:
+\begin{itemize}
+    \item \textbf{Reasoning:} LLMs can engage in various forms of reasoning, from simple fact retrieval to more complex logical deduction. Techniques like \textit{Chain-of-Thought (CoT)} prompting guide LLMs to break down complex problems into intermediate steps, making their reasoning process more transparent and accurate.
+    \item \textbf{Tool Use:} A critical emergent capability is the ability of LLMs to interact with external tools or APIs. By learning to generate structured outputs (e.g., JSON function calls) in response to prompts, LLMs can extend their functionalities beyond their training data, enabling them to perform calculations, query databases, or access real-time information.
+\end{itemize}
+
+\subsection{Embeddings and Vector Space}
+\label{sec:embeddings}
+Central to many LLM applications, especially Retrieval-Augmented Generation, is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, images, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space. For text, this means words, phrases, or documents with similar meanings will have similar vector representations. This allows for efficient comparison and retrieval of semantically related information.
+
+\section{Retrieval-Augmented Generation (The "Knowledge Provider")}
+\label{sec:rag}
+
+Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. While RAG can involve web searches for general knowledge, in a specialized application like test scope analysis, it primarily leverages curated local knowledge bases.
+
+\subsection{The RAG Pipeline Components}
+\label{sec:rag-pipeline}
+An effective RAG system comprises several key components working in concert:
+\begin{itemize}
+    \item \textbf{Document Loaders:} These components are responsible for ingesting data from various formats and sources, such as PDF documents, code repositories, databases, or internal wikis. They convert raw data into a structured format suitable for further processing.
+    \item \textbf{Text Splitters:} Large documents need to be divided into smaller, manageable chunks to fit within the LLM's context window and to optimize retrieval. Text splitters employ various strategies, including fixed-size chunks, semantic splitting based on content, or splitting by document structure (e.g., paragraphs, sections), often with configurable overlap to preserve context across chunks.
+    \item \textbf{Embedding Models:} These models transform the processed text chunks into numerical vector embeddings. The choice of embedding model can significantly impact retrieval quality, with different models producing vectors of varying sizes and capturing different semantic nuances.
+    \item \textbf{Knowledge Stores:} This refers to the databases where the embeddings and their associated metadata or raw text are stored, enabling efficient retrieval.
+    \begin{itemize}
+        \item \textbf{Vector Stores:} Optimized for similarity search, vector stores (e.g., Pinecone, ChromaDB, Weaviate) index the embeddings, allowing the system to quickly find text chunks whose vectors are closest to a given query vector, indicating semantic relevance.
+        \item \textbf{Key-Value Stores:} These databases store data as a collection of key-value pairs, providing fast lookup of raw text or metadata associated with retrieved chunks. They are often used in conjunction with vector stores to store the actual content or additional context for a given embedding.
+        \item \textbf{Knowledge Graphs (KGs):} Unlike vector or key-value stores, KGs explicitly model entities (nodes) and their relationships (edges) in a structured graph format. For test scope analysis, KGs can represent the intricate dependencies between requirements, code modules, test cases, and execution history, enabling complex, relational queries that go beyond semantic similarity. This structural context is vital for identifying the "red thread" in software artifacts.
+    \end{itemize}
+\end{itemize}
+
+\section{AI Agents (The "Orchestrator")}
+\label{sec:ai-agents}
+
+AI Agents represent a paradigm shift from simple LLM interactions to autonomous, goal-oriented systems. An AI Agent can be conceptualized as an \textbf{LLM equipped with Memory, Tools, Reasoning, and Planning capabilities}. This architecture enables agents to break down complex tasks, interact with their environment, and learn from feedback.
+
+\subsection{Key Components of an AI Agent}
+\label{sec:agent-components}
+\begin{itemize}
+    \item \textbf{LLM Integration:} The Large Language Model serves as the agent's brain, interpreting inputs, generating thoughts and plans, and deciding on actions. It translates high-level goals into executable steps and understands the outputs from tools.
+    \item \textbf{Memory Systems:} Agents require both short-term and long-term memory to maintain context and accumulate knowledge.
+    \begin{itemize}
+        \item \textbf{Internal State/Short-Term Memory:} This includes the current conversational context, scratchpad for intermediate thoughts, and temporary variables. It allows the agent to maintain coherence within a single interaction or task.
+        \item \textbf{External/Long-Term Memory:} This is where the RAG system (Vector Stores, Knowledge Graphs, etc.) acts as the agent's persistent memory. It stores vast amounts of domain-specific knowledge that the agent can retrieve and integrate into its reasoning process, overcoming the LLM's inherent knowledge cutoff.
+    \end{itemize}
+    \item \textbf{Tools:} Tools are external functions, APIs, or scripts that an agent can invoke to interact with its environment, perform specific operations (e.g., search a database, execute code, call a RAG pipeline), or gather information. The LLM decides which tool to use and how to use it based on its current goal and context.
+    \item \textbf{Reasoning and Planning:} Agents possess mechanisms to plan a sequence of actions to achieve a goal. This often involves an iterative process of:
+    \begin{enumerate}
+        \item Observing the environment.
+        \item Reflecting on the observations and past actions.
+        \item Generating a plan.
+        \item Executing a step of the plan using available tools.
+    \end{enumerate}
+    \item \textbf{Prompt Engineering:} This is the art and science of designing effective prompts to guide the LLM within the agent to achieve desired behaviors. It includes crafting system instructions, few-shot examples, and strategies for eliciting specific reasoning steps, ensuring the agent makes optimal decisions and utilizes its tools appropriately.
+    \item \textbf{Guardrails:} These are mechanisms implemented to ensure agents operate safely, reliably, and within defined ethical and operational boundaries. Guardrails can involve input validation, output filtering, adherence to policy constraints, and anomaly detection to prevent unintended or harmful actions.
+\end{itemize}
