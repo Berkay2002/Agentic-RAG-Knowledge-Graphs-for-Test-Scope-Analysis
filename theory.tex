@@ -47,17 +47,21 @@ Beyond basic text generation, advanced LLMs exhibit significant capabilities rel
     \item \textbf{Tool Use:} A critical emergent capability is the ability of LLMs to interact with external tools or APIs. By learning to generate structured outputs (e.g., JSON function calls) in response to prompts, LLMs can extend their functionalities beyond their training data, enabling them to perform calculations, query databases, or access real-time information.
 \end{itemize}
 
-\subsection{Embeddings and Vector Space}
-\label{sec:embeddings}
-Central to many LLM applications, especially Retrieval-Augmented Generation, is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, images, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space \cite{mikolov2013efficient}. For text, this means words, phrases, or documents with similar meanings will have similar vector representations. This allows for efficient comparison and retrieval of semantically related information.
+
 
 \section{Retrieval-Augmented Generation}\label{sec:rag}
 
 Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
 
+\subsection{Embeddings and Semantic Search}
+\label{sec:embeddings}
+The core mechanism enabling RAG is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, code, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space \cite{mikolov2013efficient}. This allows for efficient comparison and retrieval of semantically related information, surpassing keyword-based search by capturing intent and context.
+
+For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the choice of embedding model is critical. While seminal work like BERT \cite{devlin2019bert} and Sentence-BERT \cite{reimers2019sentence} laid the foundation for contextual embeddings, the field has evolved towards massive general-purpose models. Currently, flagship proprietary models such as OpenAI's \texttt{text-embedding-3} \cite{openai_embeddings_docs} and Google's \texttt{gemini-embedding-001} \cite{lee2025geminiembeddinggeneralizableembeddings} offer state-of-the-art performance. However, in sensitive software engineering contexts where data privacy is paramount, high-performing open-weight models are often preferred as they allow for secure, on-premise deployment. Notable examples include Qwen3-Embedding-8B \cite{zhang2025qwen3embeddingadvancingtext} and BGE-M3 \cite{chen2024bgem3embeddingmultilingualmultifunctionality}, which provide comparable retrieval quality while maintaining data sovereignty.
+
 \subsection{The RAG Pipeline Components}
 \label{sec:rag-pipeline}
-An effective RAG system for software engineering comprises several specialized components working in concert:
+An effective RAG system for software engineering comprises several specialized components working in concert to ingest, process, and store data:
 
 \subsubsection{Document Loaders (Data Integration)}
 Document loaders are responsible for ingesting data from diverse software development lifecycle (SDLC) sources \cite{gao2023retrieval}. In a corporate environment, this requires "connectors" capable of interfacing with:
@@ -74,11 +78,6 @@ Standard text splitting (e.g., every 500 characters) is detrimental in software 
     \item \textbf{Code-Aware Splitting:} Parsing the Abstract Syntax Tree (AST) of source code to split based on functional boundaries (classes, methods, functions) rather than arbitrary line counts.
     \item \textbf{Header-Based Splitting:} processing requirements documents by hierarchy (e.g., Section 1.2, 1.2.1), ensuring that the parent context (headers) is preserved with each child chunk.
 \end{itemize}
-
-\subsubsection{Embedding Models (Domain-Specific Vectorization)}
-Embedding models transform processed text chunks into numerical vector representations. For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the use of \textit{domain-specific embedding models} is critical. While seminal work like BERT \cite{devlin2019bert} and Sentence-BERT \cite{reimers2019sentence} laid the foundation for contextual embeddings, the field has evolved towards massive general-purpose models.
-
-Currently, flagship proprietary models such as OpenAI's \texttt{text-embedding-3} \cite{openai_embeddings_docs} and Google's \texttt{gemini-embedding-001} \cite{lee2025geminiembeddinggeneralizableembeddings} offer state-of-the-art performance. However, in sensitive software engineering contexts where data privacy is paramount, high-performing open-weight models are often preferred as they allow for secure, on-premise deployment. Notable examples include Qwen3-Embedding-8B \cite{zhang2025qwen3embeddingadvancingtext} and BGE-M3 \cite{chen2024bgem3embeddingmultilingualmultifunctionality}, which provide comparable retrieval quality while maintaining data sovereignty.
 
 \subsubsection{Knowledge Stores (Graph-Vector Hybrid)}
 To effectively map the test scope, the storage layer must capture both the \textit{semantics} (meaning) and the \textit{structure} (dependencies) of the data.
