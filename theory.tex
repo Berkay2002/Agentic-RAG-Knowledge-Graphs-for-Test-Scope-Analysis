@@ -60,7 +60,7 @@ Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the c
 An effective RAG system for software engineering comprises several specialized components working in concert:
 
 \subsubsection{Document Loaders (Data Integration)}
-Document loaders are responsible for ingesting data from diverse software development lifecycle (SDLC) sources. In a corporate environment, this requires "connectors" capable of interfacing with:
+Document loaders are responsible for ingesting data from diverse software development lifecycle (SDLC) sources \cite{gao2023retrieval}. In a corporate environment, this requires "connectors" capable of interfacing with:
 \begin{itemize}
     \item \textbf{Version Control Systems:} Ingesting raw source code and commit history (e.g., Git).
     \item \textbf{Documentation Platforms:} Parsing structured specifications (e.g., Markdown, PDF, Internal Wikis).
@@ -69,20 +69,20 @@ Document loaders are responsible for ingesting data from diverse software develo
 These loaders normalize disparate data formats into a unified document structure suitable for processing.
 
 \subsubsection{Text Splitters (Semantic Chunking)}
-Standard text splitting (e.g., every 500 characters) is detrimental in software contexts where maintaining logical integrity is paramount. Instead, \textit{structure-aware splitting} strategies are employed:
+Standard text splitting (e.g., every 500 characters) is detrimental in software contexts where maintaining logical integrity is paramount, especially given the "lost-in-the-middle" phenomenon where LLMs struggle to recall information from the center of long contexts \cite{liu2023lost}. Instead, \textit{structure-aware splitting} strategies are employed:
 \begin{itemize}
     \item \textbf{Code-Aware Splitting:} Parsing the Abstract Syntax Tree (AST) of source code to split based on functional boundaries (classes, methods, functions) rather than arbitrary line counts.
     \item \textbf{Header-Based Splitting:} processing requirements documents by hierarchy (e.g., Section 1.2, 1.2.1), ensuring that the parent context (headers) is preserved with each child chunk.
 \end{itemize}
 
 \subsubsection{Embedding Models (Domain-Specific Vectorization)}
-Embedding models transform processed text chunks into numerical vector representations. For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the use of \textit{domain-specific embedding models} (often open-weights models optimized for code, such as those from the BERT or Llama families) is critical. These models are deployed within the secure infrastructure, ensuring data privacy while providing high-fidelity semantic mapping.
+Embedding models transform processed text chunks into numerical vector representations. For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the use of \textit{domain-specific embedding models} is critical. While seminal work like BERT \cite{devlin2019bert} and Sentence-BERT \cite{reimers2019sentence} laid the foundation for contextual embeddings, specialized models like CodeBERT \cite{feng2020codebert} are necessary to capture the semantic nuance of programming languages. These models are deployed within the secure infrastructure, ensuring data privacy while providing high-fidelity semantic mapping.
 
 \subsubsection{Knowledge Stores (Graph-Vector Hybrid)}
 To effectively map the test scope, the storage layer must capture both the \textit{semantics} (meaning) and the \textit{structure} (dependencies) of the data.
 \begin{itemize}
-    \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures").
-    \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}).
+    \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures") \cite{johnson2017billion}.
+    \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}) \cite{pan2024unifying}.
     \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
 \end{itemize}
 
