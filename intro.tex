@@ -1,18 +1,17 @@
 %%% Intro.tex ---
 %%
 %% Filename: Intro.tex
-%% Description:
-%% Author: Ola Leifler
-%% Maintainer:
-%% Created: Thu Oct 14 12:54:47 2010 (CEST)
-%% Version: $Id$
-%% Version: 
-%% Last-Updated: Thu May 19 14:12:31 2016 (+0200)
-%% By: Ola Leifler
-%% Update #: 5
+%% Description: Introduction chapter for the Master's Thesis
+%% Author: Berkay Orhan
+%% Maintainer: Berkay Orhan
+%% Created: Tue Nov 25 2025
+%% Version: 1.0
+%% Last-Updated: Tue Nov 25 2025
+%% By: Berkay Orhan
+%% Update #: 1
 %% URL:
-%% Keywords:
-%% Compatibility:
+%% Keywords: Thesis, Introduction, RAG, Agentic, Testing
+%% Compatibility: LaTeX
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -41,11 +40,11 @@ In the domain of large-scale enterprise software development, the velocity of fe
 
 For large organizations, maintaining high test coverage while avoiding redundant execution is a complex optimization problem. When a new artifact, such as a user story or bug ticket, is introduced, test engineers must navigate vast repositories of test cases to identify existing coverage and potential gaps \cite{8054871}. Historically, this retrieval process has relied on keyword-based search or the manual inspection of static trace links. However, these traditional methods are increasingly brittle; they often fail to capture the semantic nuance of natural language requirements or the complex, graph-like dependencies between system components \cite{wang2022systematic, antoniol2025recovering}. As software systems grow in complexity, the "semantic gap" between unstructured change descriptions (e.g., "fix race condition in handover") and structured test cases (e.g., "TC\_HO\_001") widens, leading to inefficient scoping, missed defects, and increased maintenance costs \cite{fauzan2021different}.
 
-Recent advancements in Large Language Models (LLMs), which are AI models capable of understanding and generating human-like text, and Retrieval-Augmented Generation (RAG), a technique that enhances LLMs by fetching relevant information from external data sources, offer promising avenues for bridging this semantic gap \cite{fan2023large, hou2024large}. Simultaneously, Knowledge Graphs (KGs), structured representations of interconnected entities and their relationships, provide a structured means to model the intricate relationships between requirements, code, and tests \cite{kesri2021autokg, radhakrishnan2023create}. By combining these technologies into an \textit{agentic architecture}, a system where autonomous AI agents orchestrate retrieval and reasoning, there is potential to transform test scope analysis from a manual, error-prone task into an automated, explainable, and highly accurate process \cite{fuchss2025lissa}.
+Recent advancements in Large Language Models (LLMs), which are AI models capable of understanding and generating human-like text, and Retrieval-Augmented Generation (RAG), a technique that enhances LLMs by fetching relevant information from external data sources \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}, offer promising avenues for bridging this semantic gap \cite{fan2023large, hou2024large}. Simultaneously, Knowledge Graphs (KGs), structured representations of interconnected entities and their relationships, provide a structured means to model the intricate relationships between requirements, code, and tests \cite{kesri2021autokg, radhakrishnan2023create}. By combining these technologies into an \textit{agentic architecture} \cite{yao2023reactsynergizingreasoningacting}, a system where autonomous AI agents orchestrate retrieval and reasoning, there is potential to transform test scope analysis from a manual, error-prone task into an automated, explainable, and highly accurate process \cite{fuchss2025lissa}.
 
 The primary problem addressed in this thesis is the inefficiency and inaccuracy of current test scope analysis methods in large-scale software engineering contexts. Traditional keyword search approaches lack the semantic understanding required to match high-level requirements with low-level test steps, frequently resulting in low recall (missing relevant tests) or low precision (retrieving irrelevant tests).
 
-While standard RAG approaches improve semantic matching, they often suffer from "hallucinations" or fail to account for the structural context inherent in software artifacts (e.g., inheritance, trace links, execution history) \cite{Wang2024SoftwareTesting}. Conversely, purely graph-based methods struggle to effectively process the unstructured free text found in change logs and user stories \cite{cheng2025survey}. Consequently, there is a lack of integrated solutions that leverage the combined strengths of \textit{vector-based semantic retrieval} and \textit{graph-based structural reasoning} to provide accurate and explainable test scope recommendations.
+While standard RAG approaches improve semantic matching, they often suffer from "hallucinations" or fail to account for the structural context inherent in software artifacts (e.g., inheritance, trace links, execution history) \cite{Wang2024SoftwareTesting}. Conversely, purely graph-based methods struggle to effectively process the unstructured free text found in change logs and user stories \cite{cheng2025survey}. Consequently, there is a lack of integrated solutions that leverage the combined strengths of \textit{vector-based semantic retrieval} and \textit{graph-based structural reasoning}---often referred to as \textit{GraphRAG} \cite{edge2025localglobalgraphrag}---to provide accurate and explainable test scope recommendations.
 
 \subsection{Aim}
 \label{sec:aim}
@@ -91,5 +90,5 @@ The remainder of this report is structured as follows:
 
 %%% Local Variables:
 %%% mode: latex
-%%% TeX-master: "demothesis"
+%%% TeX-master: "student_thesis"
 %%% End:
