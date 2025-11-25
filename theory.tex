@@ -3,7 +3,7 @@
 
 This chapter establishes the theoretical foundation for the agent-orchestrated Retrieval-Augmented Generation (RAG) and Knowledge Graph architecture developed in this thesis. It begins by grounding the problem in the context of modern software development practices and quality assurance, followed by an in-depth exploration of Large Language Models (LLMs), RAG, and AI Agents, including their constituent components and operational mechanisms.
 
-\section{Software Development Lifecycle & Quality Assurance}
+\section{Software Development Lifecycle \& Quality Assurance}
 \label{sec:sdlc-qa}
 
 Modern software development is characterized by rapid iteration and continuous delivery, largely facilitated by Continuous Integration and Continuous Deployment (CI/CD) pipelines. These methodologies accelerate feature delivery but place significant demands on quality assurance, particularly in ensuring the reliability of complex systems through effective testing.
@@ -110,7 +110,7 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
     \end{enumerate}
     \item \textbf{Guardrails:} These are mechanisms implemented to ensure agents operate safely, reliably, and within defined ethical and operational boundaries. In the context of this thesis and deployment within a corporate environment like Ericsson, guardrails are critical for protecting proprietary intellectual property and ensuring operational integrity. They can be implemented using two complementary approaches:
     \begin{itemize}
-        \item \textbf{Deterministic Guardrails:} Use rule-based logic to enforce strict compliance. For test scope analysis, this includes verifying that suggested test files actually exist in the repository before recommendation, or enforcing PII redaction to mask sensitive user IDs in bug reports before they are processed by the model.
+        \item \textbf{Deterministic Guardrails:} Use rule-based logic to enforce strict compliance \cite{langchain2025guardrails}. For test scope analysis, this includes verifying that suggested test files actually exist in the repository before recommendation, or enforcing the redaction of Personally Identifiable Information (PII), such as masking sensitive user IDs in bug reports, before they are processed by the model.
         \item \textbf{Model-based Guardrails:} Utilize LLMs to evaluate the semantic quality of inputs and outputs. Techniques such as \textit{Constitutional AI} \cite{bai2022constitutionalaiharmlessnessai} use AI feedback to align models with safety principles, while specialized models like \textit{Llama Guard} \cite{inan2023llamaguardllmbasedinputoutput} classify content risks. In this system, model-based guardrails validate the reasoning behind test scope recommendations, ensuring the agent does not hallucinate connections between unrelated code modules.
     \end{itemize}
     Additionally, \textit{Human-in-the-loop (HITL)} mechanisms provide a critical layer of oversight for high-stakes actions, consistent with the interactive machine learning principles outlined by Amershi et al. \cite{Amershi_Cakmak_Knox_Kulesza_2014}. This architectural pattern involves pausing the agent's execution flow (interrupts) when a sensitive action is proposed. The system's state is persisted, allowing a human expert to review the request and exercise supervisory control by either \textit{approving} the action, \textit{editing} the parameters (e.g., refining a generated test case), or \textit{rejecting} the proposal entirely with feedback.
@@ -136,5 +136,5 @@ Practical implementation relies on specific strategies to combat rot and maintai
 \begin{itemize}
     \item \textbf{Compaction:} Periodically summarizing conversation history or verbose tool outputs to retain only the essential state changes, freeing up tokens for new reasoning.
     \item \textbf{Structured Note-Taking:} Empowering the agent to explicitly "write down" key facts or decisions into a dedicated memory block (or Knowledge Graph), rather than relying on implicit recall from a long transcript.
-    \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
+    \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code\_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
 \end{itemize}
