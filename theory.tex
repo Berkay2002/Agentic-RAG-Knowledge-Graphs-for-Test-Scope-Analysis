@@ -55,7 +55,7 @@ Central to many LLM applications, especially Retrieval-Augmented Generation, is 
 \section{Retrieval-Augmented Generation (The "Knowledge Provider")}
 \label{sec:rag}
 
-Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
+Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
 
 \subsection{The RAG Pipeline Components}
 \label{sec:rag-pipeline}
@@ -85,16 +85,30 @@ To effectively map the test scope, the storage layer must capture both the \text
 \begin{itemize}
     \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures").
     \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}).
-    \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
+    \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
 \end{itemize}
 
 \subsection{Context Engineering}
 \label{sec:context-engineering}
-Retrieving the right data is only half the battle; presenting it effectively to the LLM is equally critical. \textit{Context Engineering} involves optimizing the input prompt to maximize the model's reasoning performance.
+Effective RAG is not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook.
+
+\subsubsection{The Challenge of Context Rot}
+As systems scale, simply retrieving more data leads to "Context Rot," a phenomenon where the model's ability to recall and reason about specific information degrades as the context window fills with distractors \cite{anthropic2025context}. This aligns with the concept of "Brevity Bias," where critical domain insights are lost amidst noise \cite{zhang2025agenticcontextengineeringevolving}. Therefore, treating context as a finite, high-value resource is essential.
+
+\subsubsection{The ACE Framework}
+To address these limitations, we adopt principles from the Agentic Context Engineering (ACE) framework \cite{zhang2025agenticcontextengineeringevolving}. ACE treats context construction as a modular process involving:
 \begin{itemize}
-    \item \textbf{Context Window Management:} Selecting the most relevant chunks to fit within the model's token limit without diluting the signal with noise.
-    \item \textbf{Prompt Structuring:} Organizing retrieved artifacts logically (e.g., "Relevant Code," "Related Requirements," "History of Failures") to help the model distinguish between different types of evidence.
-    \item \textbf{Data Quality:} Ensuring that retrieved context is clean, de-duplicated, and up-to-date to prevent "garbage in, garbage out" scenarios.
+    \item \textbf{Generation:} Retrieving and drafting initial context blocks based on the query.
+    \item \textbf{Reflection:} Analyzing the retrieved data to identify gaps or inconsistencies.
+    \item \textbf{Curation:} Iteratively refining and structuring the context to create a coherent narrative or "playbook" for the agent.
+\end{itemize}
+
+\subsubsection{Optimization Strategies}
+Practical implementation relies on specific strategies to combat rot and maintain long-horizon coherence \cite{anthropic2025context}:
+\begin{itemize}
+    \item \textbf{Compaction:} Periodically summarizing conversation history or verbose tool outputs to retain only the essential state changes, freeing up tokens for new reasoning.
+    \item \textbf{Structured Note-Taking:} Empowering the agent to explicitly "write down" key facts or decisions into a dedicated memory block (or Knowledge Graph), rather than relying on implicit recall from a long transcript.
+    \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
 \end{itemize}
 
 \section{AI Agents (The "Orchestrator")}
@@ -108,17 +122,14 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
     \item \textbf{LLM Integration:} The Large Language Model serves as the agent's brain, interpreting inputs, generating thoughts and plans, and deciding on actions. It translates high-level goals into executable steps and understands the outputs from tools.
     \item \textbf{Memory Systems:} Agents require both short-term and long-term memory to maintain context and accumulate knowledge.
     \begin{itemize}
-        \item \textbf{Internal State/Short-Term Memory:} This includes the current conversational context, scratchpad for intermediate thoughts, and temporary variables. It allows the agent to maintain coherence within a single interaction or task.
-        \item \textbf{External/Long-Term Memory:} This is where the RAG system (Vector Stores, Knowledge Graphs, etc.) acts as the agent's persistent memory. It stores vast amounts of domain-specific knowledge that the agent can retrieve and integrate into its reasoning process, overcoming the LLM's inherent knowledge cutoff.
+        \item \textbf{Internal State/Short-Term Memory:} This includes the current conversational context, scratchpad for intermediate thoughts, and temporary variables. Strategies like \textit{Compaction} are used here to prevent context rot \cite{anthropic2025context}.
+        \item \textbf{External/Long-Term Memory (The "Playbook"):} Rather than a static database, long-term memory in advanced agents acts as a "curated playbook" \cite{zhang2025agenticcontextengineeringevolving}. The agent actively synthesizes lessons from past interactions, storing refined strategies and domain facts in the RAG system (Knowledge Graph), enabling it to improve over time without retraining.
     \end{itemize}
-    \item \textbf{Tools:} Tools are external functions, APIs, or scripts that an agent can invoke to interact with its environment, perform specific operations (e.g., search a database, execute code, call a RAG pipeline), or gather information. The LLM decides which tool to use and how to use it based on its current goal and context.
-    \item \textbf{Reasoning and Planning:} Agents possess mechanisms to plan a sequence of actions to achieve a goal. This often involves an iterative process of:
+    \item \textbf{Tools:} Tools are external functions, APIs, or scripts that an agent can invoke to interact with its environment, perform specific operations (e.g., search a database, execute code, call a RAG pipeline), or gather information.
+    \item \textbf{Reasoning and Planning:} Agents possess mechanisms to plan a sequence of actions to achieve a goal. The foundational paradigm is the \textit{ReAct} (Reason+Act) framework \cite{yao2023reactsynergizingreasoningacting}, which enables LLMs to interleave reasoning traces ("Thoughts") with task-specific "Actions" and "Observations."
     \begin{enumerate}
-        \item Observing the environment.
-        \item Reflecting on the observations and past actions.
-        \item Generating a plan.
-        \item Executing a step of the plan using available tools.
+        \item \textbf{ReAct Loop:} The agent generates a thought (e.g., "I need to check the database"), executes an action (calls the search tool), and observes the output, repeating this cycle until the task is done.
+        \item \textbf{The ACE Cycle (Advanced):} Building on this, advanced systems employ the ACE cycle \cite{zhang2025agenticcontextengineeringevolving} for self-improvement: \textit{Generation} (of the plan), \textit{Reflection} (critiquing the plan/result), and \textit{Curation} (saving the lesson to memory).
     \end{enumerate}
-    \item \textbf{Prompt Engineering:} This is the art and science of designing effective prompts to guide the LLM within the agent to achieve desired behaviors. It includes crafting system instructions, few-shot examples, and strategies for eliciting specific reasoning steps, ensuring the agent makes optimal decisions and utilizes its tools appropriately.
     \item \textbf{Guardrails:} These are mechanisms implemented to ensure agents operate safely, reliably, and within defined ethical and operational boundaries. Guardrails can involve input validation, output filtering, adherence to policy constraints, and anomaly detection to prevent unintended or harmful actions.
 \end{itemize}
