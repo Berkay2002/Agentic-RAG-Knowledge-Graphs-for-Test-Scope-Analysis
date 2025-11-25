@@ -8,7 +8,9 @@
 1.  **Refined Introduction (`intro.tex`):**
     *   Established academic tone (fewer dashes) and added inline definitions for key terms.
 2.  **Completed Theory Chapter (`theory.tex`):**
-    *   **LLMs:** Covered Transformers, MoE (Gemini 3 Pro), and Next-Token Prediction logic.
+    *   **Software Development Context:** Grounded the problem in CI/CD (Humble & Farley), Regression Testing (Rothermel & Harrold), and Test Scope Analysis (Yoo & Harman).
+    *   **LLMs:** Covered Transformers, MoE (Gemini 3 Pro), Next-Token Prediction logic, and reasoning capabilities (CoT - Wei et al., Tool Use - Shen et al.).
+    *   **Embeddings:** Defined vector representations (citing Mikolov et al.) as the prerequisite for RAG.
     *   **RAG:**
         *   Defined **Software-Specific Pipeline**: Code-aware splitting (AST), header-based splitting.
         *   **GraphRAG:** Explicitly defined the Graph-Vector Hybrid approach (citing **Edge et al., 2024**).
@@ -19,10 +21,12 @@
     *   **AI Agents:**
         *   Defined the **ReAct Framework (Yao et al., 2023)** as the foundational thought-action loop.
         *   Presented the **ACE Cycle** (Generate-Reflect-Curate) as the advanced evolutionary step for self-improving agents.
+        *   **Guardrails:** Detailed Deterministic (LangChain), Model-based (Llama Guard, Constitutional AI), and Human-in-the-Loop mechanisms.
 3.  **Updated References (`references.bib`):**
-    *   Added seminal papers: Lewis (RAG), Edge (GraphRAG), Yao (ReAct), Brown (GPT-3/Few-Shot), Kaplan (Scaling Laws).
-    *   Added modern frameworks: Zhang (ACE), Anthropic (Context Engineering).
-    *   Added Model Cards: Gemini 3 Pro, Claude 3.5 Sonnet, DeepSeek-R1.
+    *   **Seminal Papers:** Lewis (RAG), Edge (GraphRAG), Yao (ReAct), Brown (GPT-3/Few-Shot), Kaplan (Scaling Laws), Mikolov (Word2Vec), Wei (Chain-of-Thought).
+    *   **Software Engineering Foundation:** Humble (CI/CD), Rothermel (Regression Testing), Beyer (SRE/Observability).
+    *   **Modern Frameworks:** Zhang (ACE), Anthropic (Context Engineering), Shen (Tool Use Survey).
+    *   **Model Cards:** Gemini 3 Pro, Claude 3.5 Sonnet, DeepSeek-R1.
 
 ## Remaining Tasks (To-Do)
 
