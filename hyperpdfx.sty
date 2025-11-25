@@ -76,13 +76,13 @@
 \RequirePackage{etoolbox}
 \AtEndPreamble{
   % The hyperxmp from TeXlive2019 causes a mismatch in the Creator field between pdfinfo and xmp data
-  \RequirePackage{hyperxmp}[2020/06/15]
   % Workaround a bug in hyperxmp that outputs a spurious comma when pdfauthor empty
   % See https://tex.stackexchange.com/questions/365600/spurious-comma-appears-when-combining-hyperref-pdfa-with-hyperxmp
   % Perhaps this only occurs with pdflatex and not lualatex or xelatex
   \ifx\@pdfauthor\@empty\hypersetup{pdfauthor={.}}\fi
 
   \RequirePackage{hyperref} 
+  \RequirePackage{hyperxmp}[2020/06/15]
   \hypersetup{%
     pdfdisplaydoctitle=true,% Nice but not crucial
 %    % The below is needed for full PDF/X compliance

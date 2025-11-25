@@ -6,66 +6,61 @@
 
 ### What We Have Accomplished
 1.  **Refined Introduction (`intro.tex`):**
-    *   Removed excessive m-dashes for a more academic tone.
-    *   Added gentle, inline definitions for key terms (LLMs, RAG, Knowledge Graphs, Agentic Architecture) to improve accessibility for non-experts.
-2.  **Structured Theory Chapter (`theory.tex`):**
-    *   Established a "Problem -> Solution" narrative arc: Software Testing -> LLMs -> RAG -> Agents.
-    *   Implemented the **LLM Section** with a focus on:
-        *   Foundational Principles (Transformers).
-        *   Evolution to **Mixture-of-Experts (MoE)** (explicitly citing DeepSeek-R1, Gemini 3 Pro).
-        *   Clarifying the **"Next-Token Prediction"** objective as the root of emergent behavior (with citations to Brown et al., 2020 and Kaplan et al., 2020).
+    *   Established academic tone (fewer dashes) and added inline definitions for key terms.
+2.  **Completed Theory Chapter (`theory.tex`):**
+    *   **LLMs:** Covered Transformers, MoE (Gemini 3 Pro), and Next-Token Prediction logic.
+    *   **RAG:**
+        *   Defined **Software-Specific Pipeline**: Code-aware splitting (AST), header-based splitting.
+        *   **GraphRAG:** Explicitly defined the Graph-Vector Hybrid approach (citing **Edge et al., 2024**).
+        *   Cited **Lewis et al. (2020)** for the foundational RAG concept.
+    *   **Context Engineering:**
+        *   Incorporated the **ACE Framework (Zhang et al., 2025)**: Generation, Reflection, Curation.
+        *   Addressed **"Context Rot"** and strategies like Compaction/Structured Note-Taking (citing **Anthropic, 2025**).
+    *   **AI Agents:**
+        *   Defined the **ReAct Framework (Yao et al., 2023)** as the foundational thought-action loop.
+        *   Presented the **ACE Cycle** (Generate-Reflect-Curate) as the advanced evolutionary step for self-improving agents.
 3.  **Updated References (`references.bib`):**
-    *   Added Model Cards for **Gemini 3 Pro** and **Claude 3.5 Sonnet** (correcting the earlier "4.5" designation based on available data).
-    *   Added seminal papers on Scaling Laws and Few-Shot Learning.
-    *   Configured bibliography style to **IEEE** (numeric).
+    *   Added seminal papers: Lewis (RAG), Edge (GraphRAG), Yao (ReAct), Brown (GPT-3/Few-Shot), Kaplan (Scaling Laws).
+    *   Added modern frameworks: Zhang (ACE), Anthropic (Context Engineering).
+    *   Added Model Cards: Gemini 3 Pro, Claude 3.5 Sonnet, DeepSeek-R1.
 
 ## Remaining Tasks (To-Do)
 
-### 1. Complete Theory Chapter (`theory.tex`)
-*   **RAG Section:**
-    *   Deep dive into the pipeline: Document Loaders, Text Splitters (chunking), Embedding Models, Vector Stores.
-    *   Explain **Context Engineering** and the importance of data quality.
-*   **Knowledge Graph Section:**
-    *   Explain Nodes/Edges in the context of testing (e.g., Requirement -> Verifies -> Test Case).
-    *   Contrast GraphRAG with Vector-only RAG.
-*   **Agentic Systems Section:**
-    *   Detail the components: Memory (Short/Long term), Tools, Planning, and Guardrails.
-    *   Explain Observability and Evaluation within the Agent context.
+### 1. Method Chapter (`method.tex`) - **NEXT PRIORITY**
+*   **Methodology:** Define "Design Science Research" (DSR) as the overarching approach.
+*   **System Architecture:**
+    *   **Data Ingestion:** Connectors for VCS (Git) and Trackers (Jira).
+    *   **Knowledge Graph Schema:** Define the nodes (Requirement, Code, Test) and edges.
+    *   **Retrieval Agents:** Detail the specific agent types (e.g., "Scoping Agent," "Retrieval Agent").
+*   **Evaluation Framework:**
+    *   Define metrics: Precision@k, Recall@k, MAP (Mean Average Precision).
+    *   Define the "Golden Set" (ground truth) creation process.
 
-### 2. Method Chapter (`method.tex`)
-*   Draft the Design Science Research methodology.
-*   Detail the System Architecture (Data Ingestion, Graph Schema, Retrieval Agents).
-*   Define Evaluation Metrics (Precision@k, Recall@k, MAP, nDCG).
+### 2. Implementation & Results
+*   Fill based on actual coding work.
+*   Structure: Experimental Setup -> Quantitative Results -> Qualitative Analysis (Case Study).
 
-### 3. Implementation & Results
-*   These sections likely need to be filled based on your actual coding work, but we can draft the structure.
-
-### 4. Review & Refine
-*   Ensure the "Red Thread" connects the Introduction's "Motivation" through the Theory's "Solution Components" to the Method's "Implementation."
+### 3. Discussion & Conclusion
+*   Reflect on limitations (e.g., latency, cost of graph construction).
+*   Future work (e.g., multimodal inputs, autonomous test generation).
 
 ---
 
 ## Writing Guidelines & Philosophy
 
 ### 1. The "Intuitive Bridge"
-*   **Goal:** Explain complex, niche topics (Agentic RAG) to a general academic audience without "dumbing it down."
-*   **Strategy:**
-    *   Use **Inline Definitions** for the first mention of heavy terms.
-    *   Avoid assuming prior knowledge of specific AI acronyms.
-    *   Use metaphors where helpful (e.g., RAG as an "open-book exam").
+*   **Goal:** Explain complex, niche topics to a general academic audience.
+*   **Strategy:** Use inline definitions and metaphors. Avoid "curse of knowledge."
 
 ### 2. The "Red Thread" (Coherence)
-*   **Every concept must earn its place.**
-    *   *Why mention Next-Token Prediction?* To explain why Hallucinations happen and why RAG is needed.
-    *   *Why mention Traceability?* To explain why test scoping is hard and why Knowledge Graphs are the solution.
-*   **Flow:** The text should move logically from **Problem** (Testing is slow/hard) -> **Tool** (LLMs are smart but hallucinate) -> **Fix** (RAG gives them facts) -> **Structure** (Knowledge Graphs give them context) -> **Orchestrator** (Agents put it all together).
+*   **Flow:** Problem (Complexity) -> Tool (LLM) -> Fix (RAG) -> Structure (KG) -> Orchestrator (Agent).
+*   **Justification:** Every technical choice (e.g., GraphRAG vs. Vector) must be justified by the specific problem (Traceability/Dependencies).
 
 ### 3. Tone & Style
-*   **Academic yet Clear:** Avoid conversational filler. Use precise language.
-*   **Formatting:** Use commas instead of excessive m-dashes.
-*   **Citations:** Use **IEEE** style. Cite seminal papers for foundational claims (e.g., scaling laws) and Model Cards for specific model capabilities (e.g., Gemini 3 Pro).
-*   **Accuracy:** Be precise about architectures (e.g., distinguishing MoE from standard Transformers).
+*   **Academic:** Precise language, IEEE citations.
+*   **Specific:** Distinguish between general AI and "Software Engineering AI" (e.g., Code-aware embedding models).
+*   **Citations:** Always cite the "Origin" paper (Lewis, Yao) and the "State of the Art" (Zhang, Edge).
 
-### 4. Thinking Process for Future Writing
-*   **Anticipate Reader Confusion:** "If I say 'Vector Database,' will they know what a vector is?" -> *Briefly explain embeddings first.*
-*   **Avoid Tunnel Vision:** Don't get lost in the implementation details (code libraries) unless it serves the *concept*. Focus on the *architectural role* of the component.
+### 4. Thinking Process
+*   **Infrastructure Reality:** Acknowledge the "Private Cloud / Open Weights" constraint.
+*   **Agent Definition:** An agent is not just a chatbot; it is a system with a *curated playbook* (Memory) and a *self-correction loop* (Reflection).
