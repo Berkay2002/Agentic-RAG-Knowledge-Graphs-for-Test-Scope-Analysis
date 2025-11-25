@@ -51,7 +51,7 @@ Beyond basic text generation, advanced LLMs exhibit significant capabilities rel
 
 \section{Retrieval-Augmented Generation}\label{sec:rag}
 
-Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
+Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This mitigates issues like \textit{hallucinations} (generative errors where the model invents facts) and improves precision by grounding the LLM's responses in factual, up-to-date data, although it introduces the risk of retrieval errors (fetching irrelevant context). In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
 
 \subsection{Embeddings and Semantic Search}
 \label{sec:embeddings}
@@ -116,7 +116,7 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
 
 \subsection{Context Engineering}
 \label{sec:context-engineering}
-Effective RAG and Agentic systems are not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook for the agent.
+Effective RAG and Agentic systems are not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook for the agent. It is distinct from \textit{Prompt Engineering}, which focuses on optimizing the instructions given to the model. Context Engineering, conversely, focuses on the architecture and state management of the information (context window) supplied to the model to support complex reasoning tasks.
 
 \subsubsection{The Challenge of Context Rot}
 As systems scale, simply retrieving more data leads to "Context Rot," a phenomenon where the model's ability to recall and reason about specific information degrades as the context window fills with distractors \cite{anthropic2025context}. This aligns with the concept of "Brevity Bias," where critical domain insights are lost amidst noise \cite{zhang2025agenticcontextengineeringevolving}. Therefore, treating context as a finite, high-value resource is essential.
@@ -135,4 +135,43 @@ Practical implementation relies on specific strategies to combat rot and maintai
     \item \textbf{Compaction:} Periodically summarizing conversation history or verbose tool outputs to retain only the essential state changes, freeing up tokens for new reasoning.
     \item \textbf{Structured Note-Taking:} Empowering the agent to explicitly "write down" key facts or decisions into a dedicated memory block (or Knowledge Graph), rather than relying on implicit recall from a long transcript.
     \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code\_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
+\end{itemize}
+
+\section{Knowledge Graphs in Software Engineering}
+\label{sec:knowledge-graphs}
+
+Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
+
+\subsection{Graph Data Models: RDF vs. LPG}
+\label{sec:rdf-vs-lpg}
+Two primary data models exist for implementing Knowledge Graphs:
+\begin{itemize}
+    \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
+    \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
+\end{itemize}
+
+\subsection{Ontologies in Software Engineering}
+\label{sec:ontologies}
+An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
+
+\section{Evaluation Metrics}
+\label{sec:evaluation-metrics}
+
+To rigorously assess the performance of the proposed retrieval system, standard information retrieval metrics are employed.
+
+\subsection{Precision and Recall}
+\label{sec:precision-recall}
+\begin{itemize}
+    \item \textbf{Precision:} The fraction of retrieved items that are relevant. In test scope analysis, high precision means the system does not waste the engineer's time with irrelevant test suggestions.
+    \item \textbf{Recall:} The fraction of relevant items that are retrieved. High recall is critical to ensure that no necessary tests are missed, which could lead to undetected bugs.
+    \item \textbf{F1-Score:} The harmonic mean of precision and recall, providing a balanced single metric.
+\end{itemize}
+
+\subsection{Rank-Aware Metrics}
+\label{sec:rank-aware-metrics}
+Since the system provides a ranked list of recommendations, the order matters.
+\begin{itemize}
+    \item \textbf{Precision@k:} Measures precision at a specific cutoff rank $k$ (e.g., top-5 or top-10 results). This reflects the user experience, as users rarely look beyond the first few results.
+    \item \textbf{Recall@k:} Measures how many of the relevant items appear in the top $k$ results.
+    \item \textbf{NDCG (Normalized Discounted Cumulative Gain):} A measure of ranking quality that accounts for the position of relevant items. It penalizes highly relevant documents that appear lower in the list, providing a more nuanced view of ranking effectiveness than simple precision or recall.
 \end{itemize}
