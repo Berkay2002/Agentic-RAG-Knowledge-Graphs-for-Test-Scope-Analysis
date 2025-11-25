@@ -29,8 +29,7 @@ Beyond the core development and testing activities, the successful operation of 
     \item \textbf{Deployment:} Is the process of making the developed system available for use, ranging from local integration to large-scale production rollouts. For agentic systems, deployment strategies must consider integration with existing workflows, scalability, and maintenance.
 \end{itemize}
 
-\section{Large Language Models (The "Cognitive Core")}
-\label{sec:llms}
+\section{Large Language Models}\label{sec:llms}
 
 Large Language Models (LLMs) form the cognitive backbone of modern AI-driven applications, including agentic systems. These models are advanced neural networks trained on vast datasets of text, enabling them to understand, generate, and process human language with remarkable fluency.
 
@@ -52,8 +51,7 @@ Beyond basic text generation, advanced LLMs exhibit significant capabilities rel
 \label{sec:embeddings}
 Central to many LLM applications, especially Retrieval-Augmented Generation, is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, images, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space \cite{mikolov2013efficient}. For text, this means words, phrases, or documents with similar meanings will have similar vector representations. This allows for efficient comparison and retrieval of semantically related information.
 
-\section{Retrieval-Augmented Generation (The "Knowledge Provider")}
-\label{sec:rag}
+\section{Retrieval-Augmented Generation}\label{sec:rag}
 
 Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
 
@@ -88,8 +86,7 @@ To effectively map the test scope, the storage layer must capture both the \text
     \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
 \end{itemize}
 
-\section{AI Agents (The "Orchestrator")}
-\label{sec:ai-agents}
+\section{AI Agents}\label{sec:ai-agents}
 
 AI Agents represent a paradigm shift from simple LLM interactions to autonomous, goal-oriented systems. An AI Agent can be conceptualized as an \textbf{LLM equipped with Memory, Tools, Reasoning, and Planning capabilities}. This architecture enables agents to break down complex tasks, interact with their environment, and learn from feedback.
 
