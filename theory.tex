@@ -88,29 +88,6 @@ To effectively map the test scope, the storage layer must capture both the \text
     \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
 \end{itemize}
 
-\subsection{Context Engineering}
-\label{sec:context-engineering}
-Effective RAG is not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook.
-
-\subsubsection{The Challenge of Context Rot}
-As systems scale, simply retrieving more data leads to "Context Rot," a phenomenon where the model's ability to recall and reason about specific information degrades as the context window fills with distractors \cite{anthropic2025context}. This aligns with the concept of "Brevity Bias," where critical domain insights are lost amidst noise \cite{zhang2025agenticcontextengineeringevolving}. Therefore, treating context as a finite, high-value resource is essential.
-
-\subsubsection{The ACE Framework}
-To address these limitations, we adopt principles from the Agentic Context Engineering (ACE) framework \cite{zhang2025agenticcontextengineeringevolving}. ACE treats context construction as a modular process involving:
-\begin{itemize}
-    \item \textbf{Generation:} Retrieving and drafting initial context blocks based on the query.
-    \item \textbf{Reflection:} Analyzing the retrieved data to identify gaps or inconsistencies.
-    \item \textbf{Curation:} Iteratively refining and structuring the context to create a coherent narrative or "playbook" for the agent.
-\end{itemize}
-
-\subsubsection{Optimization Strategies}
-Practical implementation relies on specific strategies to combat rot and maintain long-horizon coherence \cite{anthropic2025context}:
-\begin{itemize}
-    \item \textbf{Compaction:} Periodically summarizing conversation history or verbose tool outputs to retain only the essential state changes, freeing up tokens for new reasoning.
-    \item \textbf{Structured Note-Taking:} Empowering the agent to explicitly "write down" key facts or decisions into a dedicated memory block (or Knowledge Graph), rather than relying on implicit recall from a long transcript.
-    \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code\_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
-\end{itemize}
-
 \section{AI Agents (The "Orchestrator")}
 \label{sec:ai-agents}
 
@@ -132,4 +109,27 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
         \item \textbf{The ACE Cycle (Advanced):} Building on this, advanced systems employ the ACE cycle \cite{zhang2025agenticcontextengineeringevolving} for self-improvement: \textit{Generation} (of the plan), \textit{Reflection} (critiquing the plan/result), and \textit{Curation} (saving the lesson to memory).
     \end{enumerate}
     \item \textbf{Guardrails:} These are mechanisms implemented to ensure agents operate safely, reliably, and within defined ethical and operational boundaries. Guardrails can involve input validation, output filtering, adherence to policy constraints, and anomaly detection to prevent unintended or harmful actions.
+\end{itemize}
+
+\subsection{Context Engineering}
+\label{sec:context-engineering}
+Effective RAG and Agentic systems are not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook for the agent.
+
+\subsubsection{The Challenge of Context Rot}
+As systems scale, simply retrieving more data leads to "Context Rot," a phenomenon where the model's ability to recall and reason about specific information degrades as the context window fills with distractors \cite{anthropic2025context}. This aligns with the concept of "Brevity Bias," where critical domain insights are lost amidst noise \cite{zhang2025agenticcontextengineeringevolving}. Therefore, treating context as a finite, high-value resource is essential.
+
+\subsubsection{The ACE Framework}
+To address these limitations, we adopt principles from the Agentic Context Engineering (ACE) framework \cite{zhang2025agenticcontextengineeringevolving}. ACE treats context construction as a modular process involving:
+\begin{itemize}
+    \item \textbf{Generation:} Retrieving and drafting initial context blocks based on the query.
+    \item \textbf{Reflection:} Analyzing the retrieved data to identify gaps or inconsistencies.
+    \item \textbf{Curation:} Iteratively refining and structuring the context to create a coherent narrative or "playbook" for the agent.
+\end{itemize}
+
+\subsubsection{Optimization Strategies}
+Practical implementation relies on specific strategies to combat rot and maintain long-horizon coherence \cite{anthropic2025context}:
+\begin{itemize}
+    \item \textbf{Compaction:} Periodically summarizing conversation history or verbose tool outputs to retain only the essential state changes, freeing up tokens for new reasoning.
+    \item \textbf{Structured Note-Taking:} Empowering the agent to explicitly "write down" key facts or decisions into a dedicated memory block (or Knowledge Graph), rather than relying on implicit recall from a long transcript.
+    \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
 \end{itemize}
