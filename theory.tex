@@ -55,21 +55,46 @@ Central to many LLM applications, especially Retrieval-Augmented Generation, is 
 \section{Retrieval-Augmented Generation (The "Knowledge Provider")}
 \label{sec:rag}
 
-Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. While RAG can involve web searches for general knowledge, in a specialized application like test scope analysis, it primarily leverages curated local knowledge bases.
+Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the capabilities of LLMs by enabling them to fetch and incorporate relevant information from external knowledge sources during the generation process. This mitigates issues like hallucinations and grounds the LLM's responses in factual, up-to-date data. In the context of test scope analysis, RAG serves as the bridge between the static knowledge contained in software artifacts (code, requirements, tests) and the dynamic reasoning capabilities of the LLM.
 
 \subsection{The RAG Pipeline Components}
 \label{sec:rag-pipeline}
-An effective RAG system comprises several key components working in concert:
+An effective RAG system for software engineering comprises several specialized components working in concert:
+
+\subsubsection{Document Loaders (Data Integration)}
+Document loaders are responsible for ingesting data from diverse software development lifecycle (SDLC) sources. In a corporate environment, this requires "connectors" capable of interfacing with:
 \begin{itemize}
-    \item \textbf{Document Loaders:} These components are responsible for ingesting data from various formats and sources, such as PDF documents, code repositories, databases, or internal wikis. They convert raw data into a structured format suitable for further processing.
-    \item \textbf{Text Splitters:} Large documents need to be divided into smaller, manageable chunks to fit within the LLM's context window and to optimize retrieval. Text splitters employ various strategies, including fixed-size chunks, semantic splitting based on content, or splitting by document structure (e.g., paragraphs, sections), often with configurable overlap to preserve context across chunks.
-    \item \textbf{Embedding Models:} These models transform the processed text chunks into numerical vector embeddings. The choice of embedding model can significantly impact retrieval quality, with different models producing vectors of varying sizes and capturing different semantic nuances.
-    \item \textbf{Knowledge Stores:} This refers to the databases where the embeddings and their associated metadata or raw text are stored, enabling efficient retrieval.
-    \begin{itemize}
-        \item \textbf{Vector Stores:} Optimized for similarity search, vector stores (e.g., Pinecone, ChromaDB, Weaviate) index the embeddings, allowing the system to quickly find text chunks whose vectors are closest to a given query vector, indicating semantic relevance.
-        \item \textbf{Key-Value Stores:} These databases store data as a collection of key-value pairs, providing fast lookup of raw text or metadata associated with retrieved chunks. They are often used in conjunction with vector stores to store the actual content or additional context for a given embedding.
-        \item \textbf{Knowledge Graphs (KGs):} Unlike vector or key-value stores, KGs explicitly model entities (nodes) and their relationships (edges) in a structured graph format. For test scope analysis, KGs can represent the intricate dependencies between requirements, code modules, test cases, and execution history, enabling complex, relational queries that go beyond semantic similarity. This structural context is vital for identifying the "red thread" in software artifacts.
-    \end{itemize}
+    \item \textbf{Version Control Systems:} Ingesting raw source code and commit history (e.g., Git).
+    \item \textbf{Documentation Platforms:} Parsing structured specifications (e.g., Markdown, PDF, Internal Wikis).
+    \item \textbf{Issue Trackers:} Extracting bug reports, user stories, and acceptance criteria (e.g., Jira, Linear).
+\end{itemize}
+These loaders normalize disparate data formats into a unified document structure suitable for processing.
+
+\subsubsection{Text Splitters (Semantic Chunking)}
+Standard text splitting (e.g., every 500 characters) is detrimental in software contexts where maintaining logical integrity is paramount. Instead, \textit{structure-aware splitting} strategies are employed:
+\begin{itemize}
+    \item \textbf{Code-Aware Splitting:} Parsing the Abstract Syntax Tree (AST) of source code to split based on functional boundaries (classes, methods, functions) rather than arbitrary line counts.
+    \item \textbf{Header-Based Splitting:} processing requirements documents by hierarchy (e.g., Section 1.2, 1.2.1), ensuring that the parent context (headers) is preserved with each child chunk.
+\end{itemize}
+
+\subsubsection{Embedding Models (Domain-Specific Vectorization)}
+Embedding models transform processed text chunks into numerical vector representations. For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the use of \textit{domain-specific embedding models} (often open-weights models optimized for code, such as those from the BERT or Llama families) is critical. These models are deployed within the secure infrastructure, ensuring data privacy while providing high-fidelity semantic mapping.
+
+\subsubsection{Knowledge Stores (Graph-Vector Hybrid)}
+To effectively map the test scope, the storage layer must capture both the \textit{semantics} (meaning) and the \textit{structure} (dependencies) of the data.
+\begin{itemize}
+    \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures").
+    \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}).
+    \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
+\end{itemize}
+
+\subsection{Context Engineering}
+\label{sec:context-engineering}
+Retrieving the right data is only half the battle; presenting it effectively to the LLM is equally critical. \textit{Context Engineering} involves optimizing the input prompt to maximize the model's reasoning performance.
+\begin{itemize}
+    \item \textbf{Context Window Management:} Selecting the most relevant chunks to fit within the model's token limit without diluting the signal with noise.
+    \item \textbf{Prompt Structuring:} Organizing retrieved artifacts logically (e.g., "Relevant Code," "Related Requirements," "History of Failures") to help the model distinguish between different types of evidence.
+    \item \textbf{Data Quality:} Ensuring that retrieved context is clean, de-duplicated, and up-to-date to prevent "garbage in, garbage out" scenarios.
 \end{itemize}
 
 \section{AI Agents (The "Orchestrator")}
