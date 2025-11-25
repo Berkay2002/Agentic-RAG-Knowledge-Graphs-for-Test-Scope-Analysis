@@ -10,11 +10,11 @@ Modern software development is characterized by rapid iteration and continuous d
 
 \subsection{Continuous Integration and Continuous Deployment (CI/CD)}
 \label{sec:cicd}
-CI/CD represents a set of practices that enable rapid and reliable software releases. Continuous Integration involves frequently merging code changes into a central repository, followed by automated builds and tests. Continuous Deployment extends this by automatically deploying verified changes to production. While highly efficient, CI/CD necessitates robust testing strategies to prevent the introduction of defects at an accelerated pace.
+CI/CD represents a set of practices that enable rapid and reliable software releases \cite{humble2010continuous}. Continuous Integration involves frequently merging code changes into a central repository, followed by automated builds and tests. Continuous Deployment extends this by automatically deploying verified changes to production. While highly efficient, CI/CD necessitates robust testing strategies to prevent the introduction of defects at an accelerated pace.
 
 \subsection{Regression Testing and Test Scope Analysis}
 \label{sec:regression-test-scope}
-Central to quality assurance in CI/CD environments is regression testing, which ensures that new code changes do not adversely affect existing functionalities. However, re-running all tests for every small change is resource-intensive and impractical in large-scale systems. This gives rise to the critical challenge of \textit{test scope analysis}: the activity of intelligently determining the minimal set of legacy test cases relevant for verification when a new feature, change request, or defect fix is introduced. Effective test scope analysis balances the need for high test coverage with the efficiency of execution, preventing redundant tests while identifying potential gaps.
+Central to quality assurance in CI/CD environments is regression testing, which ensures that new code changes do not adversely affect existing functionalities \cite{rothermel1996analyzing}. However, re-running all tests for every small change is resource-intensive and impractical in large-scale systems \cite{yoo2012regression}. This gives rise to the critical challenge of \textit{test scope analysis}: the activity of intelligently determining the minimal set of legacy test cases relevant for verification when a new feature, change request, or defect fix is introduced. Effective test scope analysis balances the need for high test coverage with the efficiency of execution, preventing redundant tests while identifying potential gaps.
 
 \subsection{Traceability in Software Engineering}
 \label{sec:traceability}
@@ -24,7 +24,7 @@ Software traceability refers to the ability to link related artifacts throughout
 \label{sec:oevd}
 Beyond the core development and testing activities, the successful operation of complex software systems, especially those incorporating AI, relies on robust practices for observability, evaluation, and deployment.
 \begin{itemize}
-    \item \textbf{Observability:} Refers to the ability to infer the internal states of a system by examining its external outputs. In AI-driven systems, this is crucial for understanding how models and agents make decisions, identifying potential biases, and diagnosing issues in real-time.
+    \item \textbf{Observability:} Refers to the ability to infer the internal states of a system by examining its external outputs \cite{beyer2016site}. In AI-driven systems, this is crucial for understanding how models and agents make decisions, identifying potential biases, and diagnosing issues in real-time.
     \item \textbf{Evaluation:} Encompasses the methods and metrics used to assess a system's performance, accuracy, and overall effectiveness. For test scope analysis systems, this includes quantitative metrics such as precision and recall, as well as qualitative assessments of practical utility and explainability.
     \item \textbf{Deployment:} Is the process of making the developed system available for use, ranging from local integration to large-scale production rollouts. For agentic systems, deployment strategies must consider integration with existing workflows, scalability, and maintenance.
 \end{itemize}
