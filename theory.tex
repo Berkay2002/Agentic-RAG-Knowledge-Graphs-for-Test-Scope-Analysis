@@ -116,7 +116,7 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
 
 \subsection{Context Engineering}
 \label{sec:context-engineering}
-Effective RAG and Agentic systems are not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook for the agent. It is distinct from \textit{Prompt Engineering}, which focuses on optimizing the instructions given to the model. Context Engineering, conversely, focuses on the architecture and state management of the information (context window) supplied to the model to support complex reasoning tasks.
+Effective RAG and Agentic systems are not merely about retrieving data, but about \textit{adapting} it to maximize the LLM's reasoning capabilities. Context Engineering represents a systematic framework for this adaptation, treating context not as a static buffer but as an evolving playbook for the agent. It is distinct from \textit{Prompt Engineering}, which focuses on optimizing the instructions given to the model. Context Engineering, conversely, focuses on the architecture and state management of the information (context window) supplied to the model to support complex reasoning tasks \cite{anthropic2025context, zhang2025agenticcontextengineeringevolving}.
 
 \subsubsection{The Challenge of Context Rot}
 As systems scale, simply retrieving more data leads to "Context Rot," a phenomenon where the model's ability to recall and reason about specific information degrades as the context window fills with distractors \cite{anthropic2025context}. This aligns with the concept of "Brevity Bias," where critical domain insights are lost amidst noise \cite{zhang2025agenticcontextengineeringevolving}. Therefore, treating context as a finite, high-value resource is essential.
@@ -157,21 +157,14 @@ An \textit{ontology} defines the schema or the "mental model" of the domain. In 
 \section{Evaluation Metrics}
 \label{sec:evaluation-metrics}
 
-To rigorously assess the performance of the proposed retrieval system, standard information retrieval metrics are employed.
-
-\subsection{Precision and Recall}
-\label{sec:precision-recall}
-\begin{itemize}
-    \item \textbf{Precision:} The fraction of retrieved items that are relevant. In test scope analysis, high precision means the system does not waste the engineer's time with irrelevant test suggestions.
-    \item \textbf{Recall:} The fraction of relevant items that are retrieved. High recall is critical to ensure that no necessary tests are missed, which could lead to undetected bugs.
-    \item \textbf{F1-Score:} The harmonic mean of precision and recall, providing a balanced single metric.
-\end{itemize}
+To rigorously assess the performance of the proposed retrieval system, standard metrics from the field of Information Retrieval (IR) are employed. The primary goal in test scope analysis is to present relevant tests to the engineer (high recall) while minimizing the noise of irrelevant results (high precision) within the limited window of user attention \cite{manning2008introduction}.
 
 \subsection{Rank-Aware Metrics}
 \label{sec:rank-aware-metrics}
-Since the system provides a ranked list of recommendations, the order matters.
+Since the system provides a recommended list of tests, the order of results is critical. A relevant test appearing at position 50 is effectively "missed" by a busy engineer. Therefore, we focus on rank-aware metrics:
+
 \begin{itemize}
-    \item \textbf{Precision@k:} Measures precision at a specific cutoff rank $k$ (e.g., top-5 or top-10 results). This reflects the user experience, as users rarely look beyond the first few results.
-    \item \textbf{Recall@k:} Measures how many of the relevant items appear in the top $k$ results.
-    \item \textbf{NDCG (Normalized Discounted Cumulative Gain):} A measure of ranking quality that accounts for the position of relevant items. It penalizes highly relevant documents that appear lower in the list, providing a more nuanced view of ranking effectiveness than simple precision or recall.
+    \item \textbf{Recall@k:} Measures the proportion of relevant items retrieved within the top $k$ results (e.g., $k=10$). This is the primary safety metric, indicating the system's ability to surface correct tests within the user's immediate view.
+    \item \textbf{Precision@k:} Measures the proportion of items in the top $k$ results that are actually relevant. High precision@k ensures that the user does not waste time reviewing irrelevant suggestions.
+    \item \textbf{Mean Average Precision (MAP):} While Recall@k focuses on a specific cutoff, MAP provides a single-figure measure of quality across recall levels. It calculates the average precision at the position of every relevant item, rewarding systems that place relevant tests higher in the list. This metric is widely regarded as the standard for evaluating ranked retrieval systems \cite{manning2008introduction}.
 \end{itemize}
