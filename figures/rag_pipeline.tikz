@@ -16,45 +16,46 @@
     % --- Data Ingestion Phase ---
     \node[block, colIngest] (sources) {
         \textbf{Data Sources}\\
-        \faGit* Git \quad \faFilePdf[regular] Docs \quad \faBug Jira
+        \faGit*\ \ Git \quad \faFilePdf[regular]\ \ Docs \quad \faBug\ \ Jira
     };
 
     % --- Processing Phase ---
     \node[block, colProcess, below=of sources] (chunks) {
         \textbf{Chunking & Splitting}\\
-        \faCut Structure-Aware
+        \faCut\ \ Structure-Aware
     };
     
     \node[block, colProcess, below=of chunks] (embed) {
         \textbf{Embedding & Extraction}\\
-        \faBrain Model + RE
+        \faBrain\ \ Model + RE
     };
 
     % --- Storage Phase ---
     % Vector Store (Left)
     \node[block, colStore, below left=1.5cm and 0.2cm of embed] (vec_store) {
         \textbf{Vector Store}\\
-        \faDatabase Embeddings
+        \faDatabase\ \ Embeddings
     };
     
     % Knowledge Graph (Right)
     \node[block, colStore, below right=1.5cm and 0.2cm of embed] (graph_store) {
         \textbf{Knowledge Graph}\\
-        \faProjectDiagram Entities/Relations
+        \faProjectDiagram\ \ Entities/Relations
     };
 
     % --- Retrieval Phase (The "RAG" Loop) ---
-    \node[block, colRetrieval, below=2.5cm of embed] (retrieval) {
+    % Position retrieval layer relative to vector store to ensure clearance
+    \node[block, colRetrieval, below=2cm of vec_store] (retrieval) at ($(vec_store)!0.5!(graph_store) + (0,-2.5cm)$) {
         \textbf{Hybrid Retrieval}\\
-        \faSearch Vector + Graph
+        \faSearch\ \ Vector + Graph
     };
 
     \node[block, colRetrieval, below=of retrieval] (llm) {
         \textbf{LLM Generation}\\
-        \faRobot Response
+        \faRobot\ \ Response
     };
 
-    \node[pill, left=of retrieval] (query) {\faUser User Query};
+    \node[pill, left=of retrieval] (query) {\faUser\ \ User Query};
 
     % --- Connections ---
     \draw[->, thick] (sources) -- (chunks);
