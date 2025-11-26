@@ -13,15 +13,15 @@
     % ==========================
     \node[anchor=north] (source_title) at (0,0.5) {\textbf{Source File}};
     \node[codeblock] (source) at (0, -1.5) {
-        class User {\\
-        \ \ void login() {\\
+        class User \{ \\
+        \ \ void login() \{ \\
         \ \ \ \ verify();\\
         \ \ \ \ log();\\
-        \ \ \}\\
-        \ \ void logout() {\\
+        \ \ \} \\
+        \ \ void logout() \{ \\
         \ \ \ \ cleanup();\\
-        \ \ \}\\
-        }
+        \ \ \} \\
+        \}
     };
 
     % ==========================
@@ -33,8 +33,8 @@
     % Chunk 1 (Cuts in middle of function)
     \node[badchunk, anchor=north] (f_chunk1) at (-4, -1) {
         \textbf{Chunk 1}\\
-        \texttt{class User \{} \\
-        \texttt{\ \ void login() \{} \\
+        \texttt{class User \{\}} \\
+        \texttt{\ \ void login() \{\}} \\
         \texttt{\ \ \ \ verify();}
     };
 
@@ -42,7 +42,7 @@
     \node[badchunk, below=0.3cm of f_chunk1] (f_chunk2) at (-4, -2.5) {
         \textbf{Chunk 2}\\
         \texttt{\ \ \ \ log();} \\
-        \texttt{\ \ \ \}} \\
+        \texttt{\ \ \ \}\}} \\
         \texttt{\ \ void logout()}
     };
 
