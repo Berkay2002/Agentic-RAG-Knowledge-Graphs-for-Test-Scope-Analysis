@@ -75,7 +75,8 @@
 
     % --- Background ---
     \begin{scope}[on background layer]
-        \node[draw=gray!20, fill=gray!5, rounded corners, fit=(query) (final) (dense) (sparse), label={[text=gray, font=\bfseries\small]north east:Hybrid Search Strategy}] {};
+        % Removed the label "Hybrid Search Strategy"
+        \node[draw=gray!20, fill=gray!5, rounded corners, fit=(query) (final) (dense) (sparse)] {};
     \end{scope}
 
 \end{tikzpicture}
