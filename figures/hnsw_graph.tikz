@@ -81,7 +81,7 @@
         3. \textbf{Descend:} Drop to lower, denser layer.\
         4. \textbf{Refine:} Repeat until Base Layer 0.\
         \\
-        \textcolor{blue}{$\\rightarrow$ Search Path} ($O(\\log N)$)
+        \textcolor{blue}{$\rightarrow$ Search Path} ($O(\log N)$)
     };
 
 \end{tikzpicture}

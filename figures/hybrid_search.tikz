@@ -21,12 +21,14 @@
 
     % 2. Parallel Strategies (Split)
     \node[process, colVector] (dense) at (-3, -2) {
-        \textbf{Dense Retrieval}\\\n        \faProjectDiagram\ \ Vector Search\\
+        \textbf{Dense Retrieval}\\
+        \faProjectDiagram\ \ Vector Search\\
         (Semantic)
     };
 
     \node[process, colKeyword] (sparse) at (3, -2) {
-        \textbf{Sparse Retrieval}\\\n        \faSearch\ \ BM25\\
+        \textbf{Sparse Retrieval}\\
+        \faSearch\ \ BM25\\
         (Lexical)
     };
 
@@ -43,12 +45,14 @@
 
     % 4. Fusion
     \node[process, colFusion] (rrf) at (0, -5.5) {
-        \textbf{Reciprocal Rank Fusion}\\\n        \faRandom\ \ $Score = \sum \frac{1}{k+r}$
+        \textbf{Reciprocal Rank Fusion}\\
+        \faRandom\ \ $Score = \sum \frac{1}{k+r}$
     };
 
     % 5. Output
     \node[process, colResult] (final) at (0, -7.5) {
-        \textbf{Final Ranked List}\\\n        \faListOl\ \ Unified Context
+        \textbf{Final Ranked List}\\
+        \faListOl\ \ Unified Context
     };
 
     % --- Connections ---
