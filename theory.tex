@@ -105,12 +105,11 @@ where:
 
 \subsubsection{Hybrid Search}
 For effective test scope analysis, the retrieval system must bridge the gap between high-level intent and low-level implementation. Hybrid search \cite{bruch2023analysis, rackauckas2024rag} addresses this by combining the strengths of semantic search (mapping "user login" to authentication modules) with keyword search (identifying specific variables involved in a change). By fusing these results, the system ensures that relevant tests are surfaced whether they share semantic concepts or explicit code references with the modified artifacts.
-\begin{itemize}
-    \item \textbf{Score Fusion:} Combining the raw scores from disparate algorithms is challenging due to different scales (e.g., Cosine is 0-1, BM25 is unbounded).
-    \item \textbf{Reciprocal Rank Fusion (RRF):} A robust, parameter-free method often used for fusion \cite{cormack2009reciprocal}. RRF sorts documents based on their rank rather than raw score:
-    \[ RRFscore(d) = \sum_{r \in R} \frac{1}{k + r(d)} \]
-    where $r(d)$ is the rank of document $d$ in result set $r$, and $k$ is a smoothing constant (typically 60). This ensures that documents appearing consistently high in both lists are prioritized.
-\end{itemize}
+
+A challenge in combining these disparate results is \textbf{Score Fusion}, where combining raw scores from algorithms with different scales (e.g., Cosine similarity is 0-1, BM25 is unbounded) is non-trivial. Therefore, this thesis adopts \textbf{Reciprocal Rank Fusion (RRF)} \cite{cormack2009reciprocal} as the fusion mechanism. RRF is a robust, parameter-free method that sorts documents based on their rank rather than raw score:
+\[ RRFscore(d) = \sum_{r \in R} \frac{1}{k + r(d)} \]
+where $r(d)$ is the rank of document $d$ in result set $r$, and $k$ is a smoothing constant (typically 60). This ensures that documents appearing consistently high in both lists are prioritized, effectively bypassing the challenges of score normalization.
+
 
 \subsection{The RAG Pipeline Components}
 \label{sec:rag-pipeline}
@@ -141,10 +140,10 @@ To effectively map the test scope, the storage layer must capture both the \text
 
 \subsubsection{Vector Search (HNSW)}
 \label{sec:vector-search-hnsw}
-Efficient retrieval from large vector indices relies on Approximate Nearest Neighbor (ANN) algorithms. This thesis employs \textbf{Hierarchical Navigable Small Worlds (HNSW)} graphs \cite{malkov2018efficient} for vector search. HNSW constructs a multi-layer graph where each layer is a navigable small-world graph. Queries start at the top layer (sparsest graph), quickly navigating to a local optimum, then descending to denser layers to refine the search. This hierarchical approach offers a logarithmic time complexity ($O(\log N)$) for search operations, balancing query speed with recall performance.
+Efficient retrieval from large vector indices relies on \textbf{Approximate Nearest Neighbor (ANN)} algorithms, which sacrifice a small amount of accuracy for significant gains in search speed. This thesis employs \textbf{Hierarchical Navigable Small Worlds (HNSW)} graphs \cite{malkov2018efficient} for vector search. It is important to note that the "graph" in HNSW refers to a specialized indexing structure used purely for accelerating vector similarity search. This is distinct from the semantic Knowledge Graphs discussed later in Section \ref{sec:knowledge-graphs}, which explicitly model relationships between entities. HNSW constructs a multi-layer graph where each layer is a navigable small-world graph. Queries start at the top layer (sparsest graph), quickly navigating to a local optimum, then descending to denser layers to refine the search. This hierarchical approach offers a logarithmic time complexity ($O(\log N)$) for search operations, balancing query speed with recall performance.
 
 \textbf{Connection to Integration:} HNSW is crucial for the \texttt{vector\_search()} tool (Section \ref{sec:tool-mediated-integration}) because it enables sub-second retrieval times over potentially massive code and documentation embeddings. This low-latency performance is a hard constraint for the agent's interactive Thought-Action-Observation loop, ensuring that semantic search steps do not introduce unacceptable delays in the test scope analysis process.
-    
+
     \begin{figure}[htbp]
         \centering
         \input{figures/rag_pipeline.tikz}
@@ -152,8 +151,7 @@ Efficient retrieval from large vector indices relies on Approximate Nearest Neig
         \label{fig:rag_pipeline}
     \end{figure}
     
-    \subsection{Integration Architecture: Dynamic Agentic Orchestration}
-\label{sec:integration-architecture}
+\subsection{Integration Architecture: Dynamic Agentic Orchestration}\label{sec:integration-architecture}
 
 This thesis introduces a novel agent-orchestrated architecture that dynamically integrates RAG and Knowledge Graph components for test scope analysis. Unlike static pipelines, which follow a predetermined sequence of retrieval steps, our approach leverages an AI agent to adaptively select and combine retrieval strategies based on the nuances of the user's query and the evolving information scent.
 
