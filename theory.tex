@@ -53,6 +53,37 @@ Beyond basic text generation, advanced LLMs exhibit significant capabilities rel
     \item \textbf{Tool Use:} A critical emergent capability is the ability of LLMs to interact with external tools or APIs. By learning to generate structured outputs (e.g., JSON function calls) in response to prompts, LLMs can extend their functionalities beyond their training data, enabling them to perform calculations, query databases, or access real-time information.
 \end{itemize}
 
+\section{Knowledge Graphs in Software Engineering}
+\label{sec:knowledge-graphs}
+
+Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
+
+\subsection{Graph Data Models: RDF vs. LPG}
+\label{sec:rdf-vs-lpg}
+Two primary data models exist for implementing Knowledge Graphs:
+\begin{itemize}
+    \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
+    \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
+\end{itemize}
+
+\subsubsection{LPG Mechanics: Index-Free Adjacency}
+\label{sec:lpg-mechanics}
+Central to the performance of Labeled Property Graphs, particularly for traversal-heavy workloads, is the concept of \textbf{Index-Free Adjacency}. In this model, each node directly stores pointers to its adjacent nodes and relationships. This contrasts with index-intensive models (like RDF triple stores) where relationships are discovered through lookup tables or global indices. Index-free adjacency means that the cost of traversing a relationship is constant, $O(1)$, regardless of the total size of the graph.
+
+\textbf{Connection to Integration:} This architectural choice makes the \texttt{graph\_traverse()} tool (Section \ref{sec:tool-mediated-integration}) computationally feasible for the agent's multi-hop reasoning. When the agent needs to analyze the "blast radius" of a change by exploring dependencies (e.g., from a modified function to affected tests), index-free adjacency ensures that even deep traversals complete within acceptable timeframes, preventing bottlenecks in the dynamic retrieval process.
+
+\subsection{Ontologies in Software Engineering}
+\label{sec:ontologies}
+An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
+
+\subsection{Graph Retrieval and Traversal}
+\label{sec:graph-retrieval}
+Retrieving information from a Knowledge Graph differs fundamentally from text retrieval. Instead of calculating similarity scores, it involves traversing the graph's structure to discover connections.
+\begin{itemize}
+    \item \textbf{Pattern Matching (Declarative Querying):} The most common method involves expressing a desired subgraph structure using a query language like Cypher \cite{francis2018cypher}. In test impact analysis, this allows for the precise selection of verification artifacts based on structural dependencies, such as retrieving "all \texttt{TestCases} that cover \texttt{Functions} called by the modified \texttt{Class}."
+    \item \textbf{Multi-Hop Traversal:} Complex dependencies often require traversing multiple edges (hops) to find relevant information (e.g., Requirement $\to$ Function $\to$ Test). Algorithms like Breadth-First Search (BFS) or Depth-First Search (DFS) are used to explore the neighborhood of a starting node up to a specified depth.
+    \item \textbf{Graph Algorithms:} Beyond simple traversal, advanced algorithms can be applied for global analysis. \textit{Community Detection} (e.g., Leiden algorithm \cite{traag2019louvain}) clusters densely connected nodes to identify functional software modules. For the agent, detecting these communities helps in understanding the broader "blast radius" of a change, suggesting that if one component in a tightly coupled cluster is modified, the entire module's test suite may require execution.
+\end{itemize}
 
 
 \section{Retrieval-Augmented Generation}\label{sec:rag}
@@ -191,38 +222,6 @@ The agent interacts with the underlying retrieval components through a set of we
     \item \texttt{hybrid\_search(query: str) -> List[Result]}: Combines vector and keyword search, fusing results using techniques like RRF.
 \end{itemize}
 These tool signatures hide the underlying algorithmic complexities (e.g., HNSW layers, BM25 tuning) from the agent, allowing it to reason at a higher level of abstraction about *which* tool to use rather than *how* to use it. This modular design also enables independent refinement of individual retrieval components without altering the agent's reasoning logic.
-
-\section{Knowledge Graphs in Software Engineering}
-\label{sec:knowledge-graphs}
-
-Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
-
-\subsection{Graph Data Models: RDF vs. LPG}
-\label{sec:rdf-vs-lpg}
-Two primary data models exist for implementing Knowledge Graphs:
-\begin{itemize}
-    \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
-    \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
-\end{itemize}
-
-\subsubsection{LPG Mechanics: Index-Free Adjacency}
-\label{sec:lpg-mechanics}
-Central to the performance of Labeled Property Graphs, particularly for traversal-heavy workloads, is the concept of \textbf{Index-Free Adjacency}. In this model, each node directly stores pointers to its adjacent nodes and relationships. This contrasts with index-intensive models (like RDF triple stores) where relationships are discovered through lookup tables or global indices. Index-free adjacency means that the cost of traversing a relationship is constant, $O(1)$, regardless of the total size of the graph.
-
-\textbf{Connection to Integration:} This architectural choice makes the \texttt{graph\_traverse()} tool (Section \ref{sec:tool-mediated-integration}) computationally feasible for the agent's multi-hop reasoning. When the agent needs to analyze the "blast radius" of a change by exploring dependencies (e.g., from a modified function to affected tests), index-free adjacency ensures that even deep traversals complete within acceptable timeframes, preventing bottlenecks in the dynamic retrieval process.
-
-\subsection{Ontologies in Software Engineering}
-\label{sec:ontologies}
-An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
-
-\subsection{Graph Retrieval and Traversal}
-\label{sec:graph-retrieval}
-Retrieving information from a Knowledge Graph differs fundamentally from text retrieval. Instead of calculating similarity scores, it involves traversing the graph's structure to discover connections.
-\begin{itemize}
-    \item \textbf{Pattern Matching (Declarative Querying):} The most common method involves expressing a desired subgraph structure using a query language like Cypher \cite{francis2018cypher}. In test impact analysis, this allows for the precise selection of verification artifacts based on structural dependencies, such as retrieving "all \texttt{TestCases} that cover \texttt{Functions} called by the modified \texttt{Class}."
-    \item \textbf{Multi-Hop Traversal:} Complex dependencies often require traversing multiple edges (hops) to find relevant information (e.g., Requirement $\to$ Function $\to$ Test). Algorithms like Breadth-First Search (BFS) or Depth-First Search (DFS) are used to explore the neighborhood of a starting node up to a specified depth.
-    \item \textbf{Graph Algorithms:} Beyond simple traversal, advanced algorithms can be applied for global analysis. \textit{Community Detection} (e.g., Leiden algorithm \cite{traag2019louvain}) clusters densely connected nodes to identify functional software modules. For the agent, detecting these communities helps in understanding the broader "blast radius" of a change, suggesting that if one component in a tightly coupled cluster is modified, the entire module's test suite may require execution.
-\end{itemize}
 
 \section{GraphRAG}
 \label{sec:graphrag}
