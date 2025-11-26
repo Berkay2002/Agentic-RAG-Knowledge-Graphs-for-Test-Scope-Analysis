@@ -37,6 +37,12 @@ Large Language Models (LLMs) form the cognitive backbone of modern AI-driven app
 \label{sec:llm-principles}
 At their core, LLMs are built upon the \textit{transformer architecture}, which allows them to process sequences of data in parallel, capturing long-range dependencies more effectively than previous architectures. However, the field is rapidly evolving beyond standard dense transformers. To improve efficiency and scalability, modern architectures often incorporate techniques like \textit{Mixture-of-Experts (MoE)}, where only a subset of parameters ("experts") are activated for a given input. This approach is explicitly utilized in open-weights models like DeepSeek-R1 \cite{deepseekai2025deepseekr1incentivizingreasoningcapability}. Other frontier models, such as Gemini 3 Pro \cite{gemini3pro_modelcard}, are explicitly built upon a sparse Mixture-of-Experts (MoE) transformer-based architecture, offering native multimodal support for text, vision, and audio inputs. Similarly, Claude 4.5 Sonnet \cite{claude_sonnet45_systemcard} exhibits advanced "hybrid" reasoning and multimodal capabilities, implying significant architectural innovations, though its specific internal structure remains proprietary.
 
+\subsubsection{Attention Mechanism}
+\label{sec:attention-mechanism}
+The \textbf{Attention Mechanism} \cite{vaswani2017attention} is a pivotal component of the transformer architecture, enabling LLMs to weigh the importance of different parts of the input sequence when processing each token. \textit{Self-Attention}, in particular, allows the model to capture dependencies between tokens regardless of their distance in the input, forming a rich contextual representation. This mechanism computes three vectors for each token: a Query (Q), a Key (K), and a Value (V). The attention score for a given Query token is calculated by its dot product with all Key tokens, followed by a softmax function to produce weights, which are then applied to the Value vectors.
+
+\textbf{Connection to Integration:} The Attention Mechanism is the fundamental "engine" that allows the agent to maintain context over long reasoning chains (Section \ref{sec:reasoning-planning}) and complex interactions with tools (Section \ref{sec:tool-mediated-integration}). It enables the agent to effectively recall relevant parts of the conversation history, tool outputs, and retrieved information, making coherent decisions about subsequent actions and query analysis (Section \ref{sec:query-analysis}). This capability is crucial for preventing "Context Rot" (Section \ref{sec:context-engineering}) and ensuring the agent's effectiveness in dynamic environments.
+
 Despite these structural variations, the primary training objective remains \textit{next-token prediction}: given a sequence of input tokens, the model learns to predict the most probable subsequent token. This simple task, when scaled across massive datasets and parameter counts, yields emergent capabilities in reasoning, coding, and general problem-solving \cite{brown2020gpt3, kaplan2020scaling}.
 
 \subsection{Reasoning and Tool Use Capabilities}
@@ -57,6 +63,18 @@ Retrieval-Augmented Generation (RAG) is a powerful technique that enhances the c
 \label{sec:embeddings}
 The core mechanism enabling RAG is the concept of \textit{embeddings}. Embeddings are numerical representations (vectors) of text, code, or other data, where semantically similar items are mapped closer to each other in a high-dimensional vector space \cite{mikolov2013efficient}. This allows for efficient comparison and retrieval of semantically related information, surpassing keyword-based search by capturing intent and context.
 
+\subsubsection{Code vs. Natural Language Embeddings}
+\label{sec:code-vs-nl-embeddings}
+While generic language models excel at natural language understanding, they often \textbf{fail to capture the semantic nuance of source code} or specialized software engineering terminology. This is known as the "Semantic Gap" \cite{fauzan2021different}. Failure modes include:
+\begin{itemize}
+    \item \textbf{Tokenization Issues:} Code identifiers like `calculateTotalPrice` are often split into `calculate`, `total`, `price` by natural language tokenizers, losing the original meaning.
+    \item \textbf{Structural vs. Sequential Semantics:} Natural language is largely sequential, while code has rich structural relationships (e.g., class hierarchies, function calls) that are not captured by linear text embeddings.
+    \item \textbf{Domain-Specific Vocabulary:} Codebases use highly specialized terms (e.g., `mutex`, `endianness`, `0xdeadbeef`) that are rare or have different meanings in general text corpora.
+\end{itemize}
+Therefore, for effective test scope analysis, the choice of embedding model is critical. This thesis utilizes models like \textbf{CodeBERT} \cite{guo2021codebert} or \textbf{Qwen} \cite{zhang2025qwen3embeddingadvancingtext}, which are pre-trained on vast datasets of source code, enabling them to understand code syntax and semantics more effectively than general-purpose LLMs.
+
+\textbf{Connection to Integration:} \textit{Because} semantic search, even with code-specific embeddings, has these inherent blind spots (e.g., struggling with precise structural queries like "all functions called by class X"), the agent must have the autonomy (Section \ref{sec:integration-architecture}) to *bypass* pure vector search in favor of graph traversal when a query indicates structural intent (Section \ref{sec:query-analysis}). This adaptive selection ensures robust retrieval across diverse query types.
+
 For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the choice of embedding model is critical. While seminal work like BERT \cite{devlin2019bert} and Sentence-BERT \cite{reimers2019sentence} laid the foundation for contextual embeddings, the field has evolved towards massive general-purpose models. Currently, flagship proprietary models such as OpenAI's \texttt{text-embedding-3} \cite{openai_embeddings_docs} and Google's \texttt{gemini-embedding-001} \cite{lee2025geminiembeddinggeneralizableembeddings} offer state-of-the-art performance. However, in sensitive software engineering contexts where data privacy is paramount, high-performing open-weight models are often preferred as they allow for secure, on-premise deployment. Notable examples include Qwen3-Embedding-8B \cite{zhang2025qwen3embeddingadvancingtext} and BGE-M3 \cite{chen2024bgem3embeddingmultilingualmultifunctionality}, which provide comparable retrieval quality while maintaining data sovereignty.
 
 \subsection{Text Retrieval Strategies}
@@ -72,12 +90,18 @@ Dense retrieval operates on the semantic vector space created by embedding model
 \end{itemize}
 
 \subsubsection{Sparse Retrieval (Keyword Search)}
-In the context of software repositories, sparse retrieval is indispensable for locating exact string matches. Unlike natural language, source code relies on precise identifiers. A developer searching for a specific error constant (e.g., \texttt{ERR\_TIMEOUT\_503}) or a unique function signature requires an exact lexical match, which dense retrievers often fail to capture due to tokenization or semantic abstraction. The seminal approach to term weighting is TF-IDF (Term Frequency-Inverse Document Frequency) \cite{jones1972statistical}, which assigns higher importance to terms that appear frequently in a document but rarely across the entire collection. Building upon this, the industry standard algorithm is \textbf{BM25} (Best Matching 25), a probabilistic relevance framework that improves upon TF-IDF \cite{robertson2009probabilistic, robertson1994approximations}.
+In the context of software repositories, sparse retrieval is indispensable for locating exact string matches. Unlike natural language, source code relies on precise identifiers. A developer searching for a specific error constant (e.g., \texttt{ERR\_TIMEOUT\_503}) or a unique function signature requires an exact lexical match, which dense retrievers often fail to capture due to tokenization or semantic abstraction. The seminal approach to term weighting is TF-IDF (Term Frequency-Inverse Document Frequency) \cite{jones1972statistical}, which assigns higher importance to terms that appear frequently in a document but rarely across the entire collection. Building upon this, the industry standard algorithm is \textbf{BM25} (Best Matching 25), a probabilistic relevance framework that improves upon TF-IDF \cite{robertson2009probabilistic, robertson1994approximations}. Its scoring function for a document $d$ given a query $Q$ (composed of terms $q_1, \dots, q_n$) is:
+\[ \text{BM25Score}(d, Q) = \sum_{i=1}^{n} \text{IDF}(q_i) \cdot \frac{f(q_i, d) \cdot (k_1 + 1)}{f(q_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{\text{len}(d)}{\text{avgdl}}\right) } \]
+where:
 \begin{itemize}
-    \item \textbf{Mechanism:} BM25 scores documents based on the frequency of query terms, penalizing common words \cite{jones1972statistical} and normalizing for document length.
-    \item \textbf{Strengths:} Extremely effective for exact matches, proper nouns, and specific code identifiers (e.g., function names like \texttt{processUserPayment}).
-    \item \textbf{Weaknesses:} "Vocabulary mismatch problem" – it misses relevant documents that use different words to describe the same concept.
+    \item $f(q_i, d)$ is the term frequency of query term $q_i$ in document $d$.
+    \item $\text{len}(d)$ is the length of document $d$ in words.
+    \item $\text{avgdl}$ is the average document length in the collection.
+    \item $k_1$ is a positive tuning parameter that calibrates term frequency saturation (typically $1.2 \le k_1 \le 2.0$). A higher $k_1$ means term frequency continues to increase relevance more strongly.
+    \item $b$ is a parameter ($0 \le b \le 1$) that controls document length normalization. If $b=0$, no length normalization is applied; if $b=1$, full normalization is applied, penalizing longer documents more heavily. For code, where file lengths vary significantly, appropriate $b$ selection is crucial.
 \end{itemize}
+
+\textbf{Connection to Integration:} BM25 provides the lexical precision tool that the agent exposes as `keyword_search()` (Section \ref{sec:tool-mediated-integration}). This tool is critical when the agent detects specific, precise identifiers (e.g., error codes, exact function names) in the user's query (Section \ref{sec:query-analysis}), ensuring that structurally relevant but semantically distant artifacts are retrieved effectively.
 
 \subsubsection{Hybrid Search}
 For effective test scope analysis, the retrieval system must bridge the gap between high-level intent and low-level implementation. Hybrid search \cite{bruch2023analysis, rackauckas2024rag} addresses this by combining the strengths of semantic search (mapping "user login" to authentication modules) with keyword search (identifying specific variables involved in a change). By fusing these results, the system ensures that relevant tests are surfaced whether they share semantic concepts or explicit code references with the modified artifacts.
@@ -114,6 +138,12 @@ To effectively map the test scope, the storage layer must capture both the \text
     \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures") \cite{johnson2017billion}.
     \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}) \cite{pan2024unifying}.
 \end{itemize}
+
+\subsubsection{Vector Search (HNSW)}
+\label{sec:vector-search-hnsw}
+Efficient retrieval from large vector indices relies on Approximate Nearest Neighbor (ANN) algorithms. This thesis employs \textbf{Hierarchical Navigable Small Worlds (HNSW)} graphs \cite{malkov2018efficient} for vector search. HNSW constructs a multi-layer graph where each layer is a navigable small-world graph. Queries start at the top layer (sparsest graph), quickly navigating to a local optimum, then descending to denser layers to refine the search. This hierarchical approach offers a logarithmic time complexity ($O(\log N)$) for search operations, balancing query speed with recall performance.
+
+\textbf{Connection to Integration:} HNSW is crucial for the `vector_search()` tool (Section \ref{sec:tool-mediated-integration}) because it enables sub-second retrieval times over potentially massive code and documentation embeddings. This low-latency performance is a hard constraint for the agent's interactive Thought-Action-Observation loop, ensuring that semantic search steps do not introduce unacceptable delays in the test scope analysis process.
     
     \begin{figure}[htbp]
         \centering
@@ -122,7 +152,49 @@ To effectively map the test scope, the storage layer must capture both the \text
         \label{fig:rag_pipeline}
     \end{figure}
     
-    \section{Knowledge Graphs in Software Engineering}
+    \subsection{Integration Architecture: Dynamic Agentic Orchestration}
+\label{sec:integration-architecture}
+
+This thesis introduces a novel agent-orchestrated architecture that dynamically integrates RAG and Knowledge Graph components for test scope analysis. Unlike static pipelines, which follow a predetermined sequence of retrieval steps, our approach leverages an AI agent to adaptively select and combine retrieval strategies based on the nuances of the user's query and the evolving information scent.
+
+\subsubsection{Static vs. Dynamic Retrieval Architectures}
+\label{sec:static-vs-dynamic}
+
+In a typical \textit{Static RAG pipeline}, a user query undergoes a fixed sequence of operations---e.g., embedding, vector search, graph traversal, then summarization. While predictable and robust for homogeneous query types, this rigidity is ill-suited for the heterogeneous information landscape of software engineering. Code entities (functions, classes), issue descriptions (natural language, error codes), and trace links (structural dependencies) each demand different retrieval mechanisms.
+
+Conversely, \textit{Dynamic Agentic Orchestration} empowers an LLM-based agent to serve as a reasoning engine that autonomously decides the most effective retrieval path. This approach is grounded in \textbf{Information Foraging Theory (Pirolli & Card, 1999)}, which posits that agents optimize their search strategies by following "information scent"---cues in their environment that suggest the proximity and value of desired information. In our context, the agent follows the "scent" of the query to adaptively choose between semantic, structural, or hybrid retrieval modes.
+
+Empirical motivation for this dynamic approach stems from the diverse nature of test scope analysis queries:
+\begin{itemize}
+    \item \textbf{Semantic-Only Queries:} A query like "*Tests related to authentication failures*" $\to$ Best served by \textbf{Vector Search}, identifying semantically similar code snippets or documentation. A graph walk alone might miss relevant tests if they aren't explicitly linked to "Auth" nodes.
+    \item \textbf{Structural-Only Queries:} For "*All tests calling `updateUser()`*", \textbf{Graph Traversal} is optimal, leveraging explicit call graph dependencies. Vector search might struggle with lexical variations or miss tests that call wrappers of this function.
+    \item \textbf{Hybrid Queries:} Complex requests such as "*Tests for user login with database timeouts*" necessitate a \textbf{Hybrid Search}, combining semantic understanding of "login" with structural analysis of "database" interactions.
+\end{itemize}
+A static pipeline would either always use both strategies (inefficient, adding noise) or choose one (failing on queries requiring the other), thereby underperforming across the full spectrum of user intents. Dynamic selection is thus a practical necessity for achieving comprehensive and precise test scope analysis.
+
+\subsubsection{Query Analysis for Strategy Selection}
+\label{sec:query-analysis}
+
+The agent performs intent recognition and strategy selection primarily through \textbf{Chain-of-Thought (CoT)} reasoning within its ReAct "Thought" step. This process leverages internal reasoning and prompt patterns to classify query types:
+\begin{itemize}
+    \item \textbf{Structural Signal:} Queries containing phrases like "*all tests calling X*" or "*tests affected by class Y*" signal a need for graph-based structural reasoning, leading the agent to invoke `graph_traverse()`.
+    \item \textbf{Semantic Signal:} Phrases such as "*tests related to Z*" or "*find issues about W*" indicate a semantic search, prompting the agent to use `vector_search()`.
+    \item \textbf{Hybrid Signal:} Queries combining descriptive language with specific entities, e.g., "*tests for X with Y*", suggest a need for `hybrid_search()`.
+\end{itemize}
+This emergent classification behavior, guided by the agent's system prompt and tool descriptions (detailed in Section \ref{sec:tool-use}), allows for flexible adaptation without an explicit, separate classification model.
+
+\subsubsection{Tool-Mediated Integration}
+\label{sec:tool-mediated-integration}
+
+The agent interacts with the underlying retrieval components through a set of well-defined tools, abstracting away their complexity. These tools serve as the operational interface for the agent's dynamic orchestration:
+\begin{itemize}
+    \item \texttt{vector_search(query: str, k: int) -> List[Document]}: Queries the vector index for semantically similar documents.
+    \item \texttt{graph_traverse(start_node: str, relation: str, depth: int) -> List[Node]}: Explores the Knowledge Graph based on specified starting nodes, relationship types, and traversal depth.
+    \item \texttt{hybrid_search(query: str) -> List[Result]}: Combines vector and keyword search, fusing results using techniques like RRF.
+\end{itemize}
+These tool signatures hide the underlying algorithmic complexities (e.g., HNSW layers, BM25 tuning) from the agent, allowing it to reason at a higher level of abstraction about *which* tool to use rather than *how* to use it. This modular design also enables independent refinement of individual retrieval components without altering the agent's reasoning logic.
+
+\section{Knowledge Graphs in Software Engineering}
 \label{sec:knowledge-graphs}
 
 Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
@@ -134,6 +206,12 @@ Two primary data models exist for implementing Knowledge Graphs:
     \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
     \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
 \end{itemize}
+
+\subsubsection{LPG Mechanics: Index-Free Adjacency}
+\label{sec:lpg-mechanics}
+Central to the performance of Labeled Property Graphs, particularly for traversal-heavy workloads, is the concept of \textbf{Index-Free Adjacency}. In this model, each node directly stores pointers to its adjacent nodes and relationships. This contrasts with index-intensive models (like RDF triple stores) where relationships are discovered through lookup tables or global indices. Index-free adjacency means that the cost of traversing a relationship is constant, $O(1)$, regardless of the total size of the graph.
+
+\textbf{Connection to Integration:} This architectural choice makes the `graph_traverse()` tool (Section \ref{sec:tool-mediated-integration}) computationally feasible for the agent's multi-hop reasoning. When the agent needs to analyze the "blast radius" of a change by exploring dependencies (e.g., from a modified function to affected tests), index-free adjacency ensures that even deep traversals complete within acceptable timeframes, preventing bottlenecks in the dynamic retrieval process.
 
 \subsection{Ontologies in Software Engineering}
 \label{sec:ontologies}
@@ -176,11 +254,6 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
         \item \textbf{External/Long-Term Memory:} Rather than a static database, long-term memory in advanced agents acts as a "curated playbook" \cite{zhang2025agenticcontextengineeringevolving}. The agent actively synthesizes lessons from past interactions, storing refined strategies and domain facts in the RAG system (Knowledge Graph), enabling it to improve over time without retraining.
     \end{itemize}
     \item \textbf{Tools:} Tools are external functions, APIs, or scripts that an agent can invoke to interact with its environment, perform specific operations (e.g., search a database, execute code, call a RAG pipeline), or gather information.
-    \item \textbf{Reasoning and Planning:} Agents possess mechanisms to plan a sequence of actions to achieve a goal. The foundational paradigm is the \textit{ReAct} (Reason+Act) framework \cite{yao2023reactsynergizingreasoningacting}, which enables LLMs to interleave reasoning traces ("Thoughts") with task-specific "Actions" and "Observations."
-    \begin{enumerate}
-        \item \textbf{ReAct Loop:} The agent generates a thought (e.g., "I need to check the database"), executes an action (calls the search tool), and observes the output, repeating this cycle until the task is done.
-        \item \textbf{The ACE Cycle:} Building on this, advanced systems employ the ACE cycle \cite{zhang2025agenticcontextengineeringevolving} for self-improvement: \textit{Generation} (of the plan), \textit{Reflection} (critiquing the plan/result), and \textit{Curation} (saving the lesson to memory).
-    \end{enumerate}
     \item \textbf{Guardrails:} These are mechanisms implemented to ensure agents operate safely, reliably, and within defined ethical and operational boundaries. In the context of this thesis and deployment within a corporate environment like Ericsson, guardrails are critical for protecting proprietary intellectual property and ensuring operational integrity. They can be implemented using two complementary approaches:
     \begin{itemize}
         \item \textbf{Deterministic Guardrails:} Use rule-based logic to enforce strict compliance \cite{langchain2025guardrails}. For test scope analysis, this includes verifying that suggested test files actually exist in the repository before recommendation, or enforcing the redaction of Personally Identifiable Information (PII), such as masking sensitive user IDs in bug reports, before they are processed by the model.
@@ -188,6 +261,25 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
     \end{itemize}
     Additionally, \textit{Human-in-the-loop (HITL)} mechanisms provide a critical layer of oversight for high-stakes actions, consistent with the interactive machine learning principles outlined by Amershi et al. \cite{Amershi_Cakmak_Knox_Kulesza_2014}. This architectural pattern involves pausing the agent's execution flow (interrupts) when a sensitive action is proposed. The system's state is persisted, allowing a human expert to review the request and exercise supervisory control by either \textit{approving} the action, \textit{editing} the parameters (e.g., refining a generated test case), or \textit{rejecting} the proposal entirely with feedback.
 \end{itemize}
+
+\subsection{Reasoning and Planning}
+\label{sec:reasoning-planning}
+Agents possess mechanisms to plan a sequence of actions to achieve a goal. The foundational paradigm is the \textit{ReAct} (Reason+Act) framework \cite{yao2023reactsynergizingreasoningacting}, which enables LLMs to interleave reasoning traces ("Thoughts") with task-specific "Actions" and "Observations."
+
+\subsubsection{ReAct Loop and Prompt Engineering for Tool Use}
+\label{sec:tool-use}
+The core of the ReAct paradigm is its iterative Thought-Action-Observation loop. The agent, driven by the LLM, first generates a `Thought` based on the current goal and available information. This `Thought` guides the subsequent `Action`, which is typically a call to an external tool. The `Observation` is the result of that tool's execution, which then feeds back into the loop to inform the next `Thought`.
+
+Effective tool use in this loop is heavily reliant on precise \textbf{Prompt Engineering}. The LLM is provided with a \textbf{System Prompt} that acts as its operational manual, defining its persona, overall objective, and crucially, the interface to its available tools. This system prompt typically includes:
+\begin{itemize}
+    \item \textbf{Agent Persona and Goal:} Setting the context for the agent's role (e.g., "You are an expert test scope analysis agent...") and its primary objective.
+    \item \textbf{Available Tools and Descriptions:} A structured list of callable functions (e.g., `vector_search`, `graph_traverse`, `hybrid_search`), along with clear, concise descriptions of their purpose, input parameters, and expected output types. These tool definitions are critical; they enable the agent to understand *when* and *how* to invoke each tool.
+    \item \textbf{Output Format Constraints:} Guiding the LLM to generate tool calls in a specific, parseable format (e.g., JSON).
+\end{itemize}
+This detailed prompt structure enables the emergent classification behavior described in Section \ref{sec:query-analysis}. By analyzing the user's query and the current state, the agent's `Thought` process identifies the most appropriate tool or sequence of tools, operationalizing the dynamic retrieval strategy. The quality of these tool definitions directly impacts the agent's ability to accurately map user intent to effective retrieval actions.
+
+\subsubsection{The ACE Cycle}
+Building on this, advanced systems employ the ACE cycle \cite{zhang2025agenticcontextengineeringevolving} for self-improvement: \textit{Generation} (of the plan), \textit{Reflection} (critiquing the plan/result), and \textit{Curation} (saving the lesson to memory).
 
 \subsection{Context Engineering}
 \label{sec:context-engineering}

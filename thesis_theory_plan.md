@@ -99,6 +99,15 @@ This document outlines the definitive plan for expanding the "Theoretical Framew
 
 ---
 
+## 6. Evaluation Metrics - Section 6
+
+### Metrics Justification (Section 6.1)
+*   **Refinement:** **Binary Relevance**.
+    *   **Content:** Justify Recall@k/Precision@k over NDCG.
+    *   **Connection to Integration:** Metrics evaluate the *final* output of the orchestration, independent of the path taken.
+
+---
+
 **Implementation Sequence Rationale:**
 1.  **Integration Architecture (Section 3.4):** Establishes the core thesis contribution upfront.
 2.  **ReAct & Tool Use (Section 5.1):** Provides the mechanism that implements #1.
