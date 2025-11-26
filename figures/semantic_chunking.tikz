@@ -33,17 +33,17 @@
     % Chunk 1 (Cuts in middle of function)
     \node[badchunk, anchor=north] (f_chunk1) at (-4, -1) {
         \textbf{Chunk 1}\\
-        \texttt{class User {}\\
-        \texttt{\ \ void login() {}\\
+        \texttt{class User \{} \\
+        \texttt{\ \ void login() \{} \\
         \texttt{\ \ \ \ verify();}
     };
 
     % Chunk 2 (Lost context)
     \node[badchunk, below=0.3cm of f_chunk1] (f_chunk2) at (-4, -2.5) {
         \textbf{Chunk 2}\\
-        \texttt{\ \ \ \ log();}\\
-        \texttt{\ \ \}\\
-        \texttt{\ \ void logout() }
+        \texttt{\ \ \ \ log();} \\
+        \texttt{\ \ \ \}} \\
+        \texttt{\ \ void logout()}
     };
 
     \draw[arrow] (source) -- (f_chunk1.east);
