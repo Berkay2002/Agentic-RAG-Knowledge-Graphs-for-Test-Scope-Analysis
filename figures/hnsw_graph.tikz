@@ -75,11 +75,11 @@
     % Explanation
     % ==========================
     \node[align=left, anchor=west, font=\scriptsize] at (5.5, 2) {
-        \textbf{HNSW Search Process}\
-        1. \textbf{Zoom-in:} Start at top layer (sparse).\
-        2. \textbf{Greedy Search:} Move to neighbor closest to query.\
-        3. \textbf{Descend:} Drop to lower, denser layer.\
-        4. \textbf{Refine:} Repeat until Base Layer 0.\
+        \textbf{HNSW Search Process}\\
+        1. \textbf{Zoom-in:} Start at top layer (sparse).\\
+        2. \textbf{Greedy Search:} Move to neighbor closest to query.\\
+        3. \textbf{Descend:} Drop to lower, denser layer.\\
+        4. \textbf{Refine:} Repeat until Base Layer 0.\\
         \\
         \textcolor{blue}{$\rightarrow$ Search Path} ($O(\log N)$)
     };

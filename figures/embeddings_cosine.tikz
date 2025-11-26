@@ -37,12 +37,12 @@
 
     % --- Formulas ---
     \node[align=left, anchor=north west, draw=gray!20, fill=gray!5, rounded corners] at (4.5, 4) {
-        \textbf{Cosine Similarity}\
-        Measures orientation, not magnitude.\
-        \
-        $\text{sim}(\vec{A}, \vec{B}) = \cos(\theta) = \frac{\vec{A} \cdot \vec{B}}{\|\vec{A}\| \|\vec{B}\|}$\
-        \
-        \textcolor{blue}{$\vec{v}_{Login} \approx \vec{v}_{Auth}$} (Synonyms)\
+        \textbf{Cosine Similarity}\\
+        Measures orientation, not magnitude.\\
+        \\
+        $\text{sim}(\vec{A}, \vec{B}) = \cos(\theta) = \frac{\vec{A} \cdot \vec{B}}{\|\vec{A}\| \|\vec{B}\|}$\\
+        \\
+        \textcolor{blue}{$\vec{v}_{Login} \approx \vec{v}_{Auth}$} (Synonyms)\\
         \textcolor{red}{$\vec{v}_{Login} \perp \vec{v}_{Payment}$} (Unrelated)
     };
 
