@@ -101,7 +101,7 @@ where:
     \item $b$ is a parameter ($0 \le b \le 1$) that controls document length normalization. If $b=0$, no length normalization is applied; if $b=1$, full normalization is applied, penalizing longer documents more heavily. For code, where file lengths vary significantly, appropriate $b$ selection is crucial.
 \end{itemize}
 
-\textbf{Connection to Integration:} BM25 provides the lexical precision tool that the agent exposes as `keyword_search()` (Section \ref{sec:tool-mediated-integration}). This tool is critical when the agent detects specific, precise identifiers (e.g., error codes, exact function names) in the user's query (Section \ref{sec:query-analysis}), ensuring that structurally relevant but semantically distant artifacts are retrieved effectively.
+\textbf{Connection to Integration:} BM25 provides the lexical precision tool that the agent exposes as \texttt{keyword_search()} (Section \ref{sec:tool-mediated-integration}). This tool is critical when the agent detects specific, precise identifiers (e.g., error codes, exact function names) in the user's query (Section \ref{sec:query-analysis}), ensuring that structurally relevant but semantically distant artifacts are retrieved effectively.
 
 \subsubsection{Hybrid Search}
 For effective test scope analysis, the retrieval system must bridge the gap between high-level intent and low-level implementation. Hybrid search \cite{bruch2023analysis, rackauckas2024rag} addresses this by combining the strengths of semantic search (mapping "user login" to authentication modules) with keyword search (identifying specific variables involved in a change). By fusing these results, the system ensures that relevant tests are surfaced whether they share semantic concepts or explicit code references with the modified artifacts.
@@ -143,7 +143,7 @@ To effectively map the test scope, the storage layer must capture both the \text
 \label{sec:vector-search-hnsw}
 Efficient retrieval from large vector indices relies on Approximate Nearest Neighbor (ANN) algorithms. This thesis employs \textbf{Hierarchical Navigable Small Worlds (HNSW)} graphs \cite{malkov2018efficient} for vector search. HNSW constructs a multi-layer graph where each layer is a navigable small-world graph. Queries start at the top layer (sparsest graph), quickly navigating to a local optimum, then descending to denser layers to refine the search. This hierarchical approach offers a logarithmic time complexity ($O(\log N)$) for search operations, balancing query speed with recall performance.
 
-\textbf{Connection to Integration:} HNSW is crucial for the `vector_search()` tool (Section \ref{sec:tool-mediated-integration}) because it enables sub-second retrieval times over potentially massive code and documentation embeddings. This low-latency performance is a hard constraint for the agent's interactive Thought-Action-Observation loop, ensuring that semantic search steps do not introduce unacceptable delays in the test scope analysis process.
+\textbf{Connection to Integration:} HNSW is crucial for the \texttt{vector\_search()} tool (Section \ref{sec:tool-mediated-integration}) because it enables sub-second retrieval times over potentially massive code and documentation embeddings. This low-latency performance is a hard constraint for the agent's interactive Thought-Action-Observation loop, ensuring that semantic search steps do not introduce unacceptable delays in the test scope analysis process.
     
     \begin{figure}[htbp]
         \centering
@@ -177,9 +177,9 @@ A static pipeline would either always use both strategies (inefficient, adding n
 
 The agent performs intent recognition and strategy selection primarily through \textbf{Chain-of-Thought (CoT)} reasoning within its ReAct "Thought" step. This process leverages internal reasoning and prompt patterns to classify query types:
 \begin{itemize}
-    \item \textbf{Structural Signal:} Queries containing phrases like "*all tests calling X*" or "*tests affected by class Y*" signal a need for graph-based structural reasoning, leading the agent to invoke `graph_traverse()`.
-    \item \textbf{Semantic Signal:} Phrases such as "*tests related to Z*" or "*find issues about W*" indicate a semantic search, prompting the agent to use `vector_search()`.
-    \item \textbf{Hybrid Signal:} Queries combining descriptive language with specific entities, e.g., "*tests for X with Y*", suggest a need for `hybrid_search()`.
+    \item \textbf{Structural Signal:} Queries containing phrases like "*all tests calling X*" or "*tests affected by class Y*" signal a need for graph-based structural reasoning, leading the agent to invoke \texttt{graph\_traverse()}.
+    \item \textbf{Semantic Signal:} Phrases such as "*tests related to Z*" or "*find issues about W*" indicate a semantic search, prompting the agent to use \texttt{vector\_search()}.
+    \item \textbf{Hybrid Signal:} Queries combining descriptive language with specific entities, e.g., "*tests for X with Y*", suggest a need for \texttt{hybrid\_search()}.
 \end{itemize}
 This emergent classification behavior, guided by the agent's system prompt and tool descriptions (detailed in Section \ref{sec:tool-use}), allows for flexible adaptation without an explicit, separate classification model.
 
@@ -188,9 +188,9 @@ This emergent classification behavior, guided by the agent's system prompt and t
 
 The agent interacts with the underlying retrieval components through a set of well-defined tools, abstracting away their complexity. These tools serve as the operational interface for the agent's dynamic orchestration:
 \begin{itemize}
-    \item \texttt{vector_search(query: str, k: int) -> List[Document]}: Queries the vector index for semantically similar documents.
-    \item \texttt{graph_traverse(start_node: str, relation: str, depth: int) -> List[Node]}: Explores the Knowledge Graph based on specified starting nodes, relationship types, and traversal depth.
-    \item \texttt{hybrid_search(query: str) -> List[Result]}: Combines vector and keyword search, fusing results using techniques like RRF.
+    \item \texttt{vector\_search(query: str, k: int) -> List[Document]}: Queries the vector index for semantically similar documents.
+    \item \texttt{graph\_traverse(start\_node: str, relation: str, depth: int) -> List[Node]}: Explores the Knowledge Graph based on specified starting nodes, relationship types, and traversal depth.
+    \item \texttt{hybrid\_search(query: str) -> List[Result]}: Combines vector and keyword search, fusing results using techniques like RRF.
 \end{itemize}
 These tool signatures hide the underlying algorithmic complexities (e.g., HNSW layers, BM25 tuning) from the agent, allowing it to reason at a higher level of abstraction about *which* tool to use rather than *how* to use it. This modular design also enables independent refinement of individual retrieval components without altering the agent's reasoning logic.
 
@@ -211,7 +211,7 @@ Two primary data models exist for implementing Knowledge Graphs:
 \label{sec:lpg-mechanics}
 Central to the performance of Labeled Property Graphs, particularly for traversal-heavy workloads, is the concept of \textbf{Index-Free Adjacency}. In this model, each node directly stores pointers to its adjacent nodes and relationships. This contrasts with index-intensive models (like RDF triple stores) where relationships are discovered through lookup tables or global indices. Index-free adjacency means that the cost of traversing a relationship is constant, $O(1)$, regardless of the total size of the graph.
 
-\textbf{Connection to Integration:} This architectural choice makes the `graph_traverse()` tool (Section \ref{sec:tool-mediated-integration}) computationally feasible for the agent's multi-hop reasoning. When the agent needs to analyze the "blast radius" of a change by exploring dependencies (e.g., from a modified function to affected tests), index-free adjacency ensures that even deep traversals complete within acceptable timeframes, preventing bottlenecks in the dynamic retrieval process.
+\textbf{Connection to Integration:} This architectural choice makes the \texttt{graph\_traverse()} tool (Section \ref{sec:tool-mediated-integration}) computationally feasible for the agent's multi-hop reasoning. When the agent needs to analyze the "blast radius" of a change by exploring dependencies (e.g., from a modified function to affected tests), index-free adjacency ensures that even deep traversals complete within acceptable timeframes, preventing bottlenecks in the dynamic retrieval process.
 
 \subsection{Ontologies in Software Engineering}
 \label{sec:ontologies}
@@ -273,7 +273,7 @@ The core of the ReAct paradigm is its iterative Thought-Action-Observation loop.
 Effective tool use in this loop is heavily reliant on precise \textbf{Prompt Engineering}. The LLM is provided with a \textbf{System Prompt} that acts as its operational manual, defining its persona, overall objective, and crucially, the interface to its available tools. This system prompt typically includes:
 \begin{itemize}
     \item \textbf{Agent Persona and Goal:} Setting the context for the agent's role (e.g., "You are an expert test scope analysis agent...") and its primary objective.
-    \item \textbf{Available Tools and Descriptions:} A structured list of callable functions (e.g., `vector_search`, `graph_traverse`, `hybrid_search`), along with clear, concise descriptions of their purpose, input parameters, and expected output types. These tool definitions are critical; they enable the agent to understand *when* and *how* to invoke each tool.
+    \item \textbf{Available Tools and Descriptions:} A structured list of callable functions (e.g., \texttt{vector\_search}, \texttt{graph\_traverse}, \texttt{hybrid\_search}), along with clear, concise descriptions of their purpose, input parameters, and expected output types. These tool definitions are critical; they enable the agent to understand *when* and *how* to invoke each tool.
     \item \textbf{Output Format Constraints:} Guiding the LLM to generate tool calls in a specific, parseable format (e.g., JSON).
 \end{itemize}
 This detailed prompt structure enables the emergent classification behavior described in Section \ref{sec:query-analysis}. By analyzing the user's query and the current state, the agent's `Thought` process identifies the most appropriate tool or sequence of tools, operationalizing the dynamic retrieval strategy. The quality of these tool definitions directly impacts the agent's ability to accurately map user intent to effective retrieval actions.
