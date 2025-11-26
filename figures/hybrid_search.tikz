@@ -16,7 +16,8 @@
 
     % 1. Input
     \node[process, colQuery] (query) at (0, 0) {
-        \textbf{User Query}\\\n        \faKeyboard\ \ "Login Error 503"
+        \textbf{User Query}\\
+        \faKeyboard\ \ "Login Error 503"
     };
 
     % 2. Parallel Strategies (Split)
