@@ -59,6 +59,35 @@ The core mechanism enabling RAG is the concept of \textit{embeddings}. Embedding
 
 For technical domains, generic language models often fail to capture the semantic nuance of code or specialized terminology. Therefore, the choice of embedding model is critical. While seminal work like BERT \cite{devlin2019bert} and Sentence-BERT \cite{reimers2019sentence} laid the foundation for contextual embeddings, the field has evolved towards massive general-purpose models. Currently, flagship proprietary models such as OpenAI's \texttt{text-embedding-3} \cite{openai_embeddings_docs} and Google's \texttt{gemini-embedding-001} \cite{lee2025geminiembeddinggeneralizableembeddings} offer state-of-the-art performance. However, in sensitive software engineering contexts where data privacy is paramount, high-performing open-weight models are often preferred as they allow for secure, on-premise deployment. Notable examples include Qwen3-Embedding-8B \cite{zhang2025qwen3embeddingadvancingtext} and BGE-M3 \cite{chen2024bgem3embeddingmultilingualmultifunctionality}, which provide comparable retrieval quality while maintaining data sovereignty.
 
+\subsection{Text Retrieval Strategies}
+\label{sec:text-retrieval-strategies}
+Effective RAG systems rely on robust mechanisms to locate relevant textual information. These strategies are generally categorized by how they represent and match data.
+
+\subsubsection{Dense Retrieval (Vector Search)}
+Dense retrieval operates on the semantic vector space created by embedding models. It calculates similarity metrics, typically \textit{Cosine Similarity} or \textit{Euclidean Distance}, between the query vector and document vectors.
+\begin{itemize}
+    \item \textbf{Mechanism:} $score(q, d) = \cos(\vec{v}_q, \vec{v}_d) = \frac{\vec{v}_q \cdot \vec{v}_d}{\|\vec{v}_q\| \|\vec{v}_d\|}$
+    \item \textbf{Strengths:} Captures semantic meaning, synonyms, and intent (e.g., mapping "login issue" to "authentication failure").
+    \item \textbf{Weaknesses:} Struggles with precise keyword matching, rare entities, or specific technical identifiers (e.g., error codes like \texttt{0x8004}).
+\end{itemize}
+
+\subsubsection{Sparse Retrieval (Keyword Search)}
+In the context of software repositories, sparse retrieval is indispensable for locating exact string matches. Unlike natural language, source code relies on precise identifiers. A developer searching for a specific error constant (e.g., \texttt{ERR\_TIMEOUT\_503}) or a unique function signature requires an exact lexical match, which dense retrievers often fail to capture due to tokenization or semantic abstraction. The industry standard algorithm is \textbf{BM25} (Best Matching 25), a probabilistic relevance framework that improves upon TF-IDF \cite{robertson2009probabilistic, robertson1994approximations}.
+\begin{itemize}
+    \item \textbf{Mechanism:} BM25 scores documents based on the frequency of query terms, penalizing common words \cite{jones1972statistical} and normalizing for document length.
+    \item \textbf{Strengths:} Extremely effective for exact matches, proper nouns, and specific code identifiers (e.g., function names like \texttt{processUserPayment}).
+    \item \textbf{Weaknesses:} "Vocabulary mismatch problem" – it misses relevant documents that use different words to describe the same concept.
+\end{itemize}
+
+\subsubsection{Hybrid Search}
+For effective test scope analysis, the retrieval system must bridge the gap between high-level intent and low-level implementation. Hybrid search \cite{bruch2023analysis, rackauckas2024rag} addresses this by combining the strengths of semantic search (mapping "user login" to authentication modules) with keyword search (identifying specific variables involved in a change). By fusing these results, the system ensures that relevant tests are surfaced whether they share semantic concepts or explicit code references with the modified artifacts.
+\begin{itemize}
+    \item \textbf{Score Fusion:} Combining the raw scores from disparate algorithms is challenging due to different scales (e.g., Cosine is 0-1, BM25 is unbounded).
+    \item \textbf{Reciprocal Rank Fusion (RRF):} A robust, parameter-free method often used for fusion \cite{cormack2009reciprocal}. RRF sorts documents based on their rank rather than raw score:
+    \[ RRFscore(d) = \sum_{r \in R} \frac{1}{k + r(d)} \]
+    where $r(d)$ is the rank of document $d$ in result set $r$, and $k$ is a smoothing constant (typically 60). This ensures that documents appearing consistently high in both lists are prioritized.
+\end{itemize}
+
 \subsection{The RAG Pipeline Components}
 \label{sec:rag-pipeline}
 An effective RAG system for software engineering comprises several specialized components working in concert to ingest, process, and store data:
@@ -79,13 +108,12 @@ Standard text splitting (e.g., every 500 characters) is detrimental in software 
     \item \textbf{Header-Based Splitting:} processing requirements documents by hierarchy (e.g., Section 1.2, 1.2.1), ensuring that the parent context (headers) is preserved with each child chunk.
 \end{itemize}
 
-\subsubsection{Knowledge Stores (Graph-Vector Hybrid)}
+\subsubsection{Knowledge Stores}
 To effectively map the test scope, the storage layer must capture both the \textit{semantics} (meaning) and the \textit{structure} (dependencies) of the data.
 \begin{itemize}
     \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures") \cite{johnson2017billion}.
     \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}) \cite{pan2024unifying}.
-    \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
-    \end{itemize}
+\end{itemize}
     
     \begin{figure}[htbp]
         \centering
@@ -110,6 +138,29 @@ Two primary data models exist for implementing Knowledge Graphs:
 \subsection{Ontologies in Software Engineering}
 \label{sec:ontologies}
 An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
+
+\subsection{Graph Retrieval and Traversal}
+\label{sec:graph-retrieval}
+Retrieving information from a Knowledge Graph differs fundamentally from text retrieval. Instead of calculating similarity scores, it involves traversing the graph's structure to discover connections.
+\begin{itemize}
+    \item \textbf{Pattern Matching (Declarative Querying):} The most common method involves expressing a desired subgraph structure using a query language like Cypher \cite{francis2018cypher}. In test impact analysis, this allows for the precise selection of verification artifacts based on structural dependencies, such as retrieving "all \texttt{TestCases} that cover \texttt{Functions} called by the modified \texttt{Class}."
+    \item \textbf{Multi-Hop Traversal:} Complex dependencies often require traversing multiple edges (hops) to find relevant information (e.g., Requirement $\to$ Function $\to$ Test). Algorithms like Breadth-First Search (BFS) or Depth-First Search (DFS) are used to explore the neighborhood of a starting node up to a specified depth.
+    \item \textbf{Graph Algorithms:} Beyond simple traversal, advanced algorithms can be applied for global analysis. \textit{Community Detection} (e.g., Leiden algorithm \cite{traag2019louvain}) clusters densely connected nodes to identify functional software modules. For the agent, detecting these communities helps in understanding the broader "blast radius" of a change, suggesting that if one component in a tightly coupled cluster is modified, the entire module's test suite may require execution.
+\end{itemize}
+
+\section{GraphRAG}
+\label{sec:graphrag}
+While traditional RAG systems rely primarily on vector similarity to retrieve disjoint chunks of text, they often struggle with queries that require global reasoning or traversing complex dependencies. \textit{GraphRAG} (Graph-based Retrieval-Augmented Generation) addresses this limitation by integrating Knowledge Graphs into the retrieval process.
+
+\subsection{Traditional RAG vs. GraphRAG}
+Traditional RAG, or \textit{Baseline RAG}, follows a "retrieve-then-read" paradigm where the system fetches top-k semantically similar documents and feeds them to the LLM \cite{lewis2021retrievalaugmentedgenerationknowledgeintensivenlp}. This approach is effective for explicit fact retrieval but often fails when the answer requires synthesizing information across multiple, indirectly connected documents (e.g., "How does a change in the billing module affect the reporting service?").
+
+GraphRAG, specifically the approach formalized by Edge et al. \cite{edge2025localglobalgraphrag}, augments this by using the structural connections within a Knowledge Graph. It allows the system to:
+\begin{itemize}
+    \item \textbf{Traverse Relationships:} Moving from a retrieved entity to its neighbors to gather relevant context (e.g., finding all tests linked to a modified function).
+    \item \textbf{Synthesize Global Context:} Using community detection or path traversal to generate answers that reflect the broader system architecture rather than just isolated snippets.
+\end{itemize}
+In the context of test scope analysis, GraphRAG enables the retrieval system to "reason" about the software's structure, identifying test cases that are not textually similar to a code change but are structurally dependent on it.
 
 \section{AI Agents}\label{sec:ai-agents}
 

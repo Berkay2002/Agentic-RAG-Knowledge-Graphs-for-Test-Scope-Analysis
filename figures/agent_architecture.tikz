@@ -24,7 +24,7 @@
     \end{scope}
 
     % 3. Tools Module (Bottom)
-    \node[tool, below=2cm of llm, minimum width=5cm] (tools) {\textbf{External Tools}\\(Search, Code Execution, API)};
+    \node[tool, below=2cm of llm, minimum width=5cm] (tools) {\textbf{External Tools}\\(Hybrid Search, VCS/Git, Issue Tracker)};
 
     % 4. External Inputs/Outputs
     \node[external, left=2cm of llm] (user) {User\\Input};
