@@ -1,47 +1,80 @@
 \begin{tikzpicture}[
-    node distance=1.5cm and 2cm,
-    font=\small\sffamily,
+    node distance=1.2cm and 1.2cm,
+    font=\sffamily\small,
     >=Stealth,
-    % Define styles
-    block/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, align=center, fill=white, thick},
-    source/.style={block, fill=violet!10},
-    process/.style={block, fill=yellow!10},
-    storage/.style={block, fill=blue!10},
-    container/.style={draw, dashed, inner sep=0.5cm, rounded corners, fill=gray!5, label={[anchor=north west, font=\footnotesize\bfseries, text=gray]north west:#1}}
+    % Define specific colors for clarity
+    colIngest/.style={fill=blue!10, draw=blue!40, thick},
+    colProcess/.style={fill=yellow!10, draw=orange!40, thick},
+    colStore/.style={fill=green!10, draw=green!40, thick},
+    colRetrieval/.style={fill=purple!10, draw=purple!40, thick},
+    % Define shapes
+    block/.style={rectangle, rounded corners, align=center, minimum width=2.8cm, minimum height=1cm, inner sep=6pt},
+    pill/.style={rectangle, rounded corners=0.5cm, align=center, fill=gray!10, draw=gray, thin, font=\footnotesize},
+    container/.style={draw, dashed, inner sep=0.6cm, rounded corners, fill=gray!5, label={[anchor=north west, text=gray!70, font=\bfseries\footnotesize, yshift=-0.2cm]north west:#1}}
 ]
 
-    % Data Ingestion Sources
-    \node[source] (git) {\faGit\ Version Control};
-    \node[source, right=of git] (docs) {\faFilePdf\ Documentation};
-    \node[source, right=of docs] (jira) {\faBug\ Issue Trackers};
+    % --- Data Ingestion Phase ---
+    \node[block, colIngest] (sources) {
+        \textbf{Data Sources}\\
+        \faGit* Git \quad \faFilePdf[regular] Docs \quad \faBug Jira
+    };
 
-    % Processing Layer
-    \node[process, below=1.5cm of $(git)!0.5!(jira)$] (loaders) {\faCogs\ Document Loaders};
-    \node[process, below=of loaders] (splitters) {\faCut\ Text Splitters\\(Structure-Aware)};
-    \node[process, below=of splitters] (embedding_model) {\faBrain\ Embedding Model};
-
-    % Knowledge Stores
-    \node[storage, below left=1.5cm and 1cm of embedding_model] (vector_index) {\faDatabase\ Vector Index\\(Semantic Search)};
-    \node[storage, below right=1.5cm and 1cm of embedding_model] (knowledge_graph) {\faProjectDiagram\ Knowledge Graph\\(Structural Relations)};
-
-    % Grouping Containers
-    \node[container={Data Ingestion}, fit=(git) (jira)] (sources_box) {};
-    \node[container={Processing Layer}, fit=(loaders) (embedding_model)] (processing_box) {};
-    \node[container={Knowledge Stores}, fit=(vector_index) (knowledge_graph)] (storage_box) {};
-
-    % Connections
-    \draw[->, thick] (git) -- (loaders);
-    \draw[->, thick] (docs) -- (loaders);
-    \draw[->, thick] (jira) -- (loaders);
-
-    \draw[->, thick] (loaders) -- (splitters);
-    \draw[->, thick] (splitters) -- (embedding_model);
+    % --- Processing Phase ---
+    \node[block, colProcess, below=of sources] (chunks) {
+        \textbf{Chunking & Splitting}\\
+        \faCut Structure-Aware
+    };
     
-    % Split for KG and Vector
-    \draw[->, thick] (splitters.south) -| node[above, pos=0.25, font=\footnotesize] {Entities & Relations} (knowledge_graph.north);
-    \draw[->, thick] (embedding_model.south) -| node[above, pos=0.25, font=\footnotesize] {Vectors} (vector_index.north);
+    \node[block, colProcess, below=of chunks] (embed) {
+        \textbf{Embedding & Extraction}\\
+        \faBrain Model + RE
+    };
 
-    % Implicit Retrieval (dashed for context)
-    \draw[->, thick, dashed, gray] (vector_index.south) -- ++(0,-1cm) -| node[below, pos=0.25, font=\footnotesize] {Retrieve Context} ($(vector_index)!0.5!(knowledge_graph)$) -| (knowledge_graph.south);
+    % --- Storage Phase ---
+    % Vector Store (Left)
+    \node[block, colStore, below left=1.5cm and 0.2cm of embed] (vec_store) {
+        \textbf{Vector Store}\\
+        \faDatabase Embeddings
+    };
     
+    % Knowledge Graph (Right)
+    \node[block, colStore, below right=1.5cm and 0.2cm of embed] (graph_store) {
+        \textbf{Knowledge Graph}\\
+        \faProjectDiagram Entities/Relations
+    };
+
+    % --- Retrieval Phase (The "RAG" Loop) ---
+    \node[block, colRetrieval, below=2.5cm of embed] (retrieval) {
+        \textbf{Hybrid Retrieval}\\
+        \faSearch Vector + Graph
+    };
+
+    \node[block, colRetrieval, below=of retrieval] (llm) {
+        \textbf{LLM Generation}\\
+        \faRobot Response
+    };
+
+    \node[pill, left=of retrieval] (query) {\faUser User Query};
+
+    % --- Connections ---
+    \draw[->, thick] (sources) -- (chunks);
+    \draw[->, thick] (chunks) -- (embed);
+    
+    % Split to stores
+    \draw[->, thick] (embed) -- node[left, font=\footnotesize, pos=0.4] {Vectors} (vec_store);
+    \draw[->, thick] (embed) -- node[right, font=\footnotesize, pos=0.4] {Triples} (graph_store);
+    
+    % Retrieval flows
+    \draw[->, thick] (query) -- (retrieval);
+    \draw[<->, dashed, thick] (retrieval) -- (vec_store);
+    \draw[<->, dashed, thick] (retrieval) -- (graph_store);
+    \draw[->, thick] (retrieval) -- node[right, font=\footnotesize] {Context} (llm);
+
+    % --- Grouping Containers (Background) ---
+    \begin{scope}[on background layer]
+        \node[container={Ingestion Pipeline}, fit=(sources) (chunks) (embed)] (box_ingest) {};
+        \node[container={Knowledge Base}, fit=(vec_store) (graph_store)] (box_storage) {};
+        \node[container={Inference}, fit=(query) (retrieval) (llm)] (box_inference) {};
+    \end{scope}
+
 \end{tikzpicture}
