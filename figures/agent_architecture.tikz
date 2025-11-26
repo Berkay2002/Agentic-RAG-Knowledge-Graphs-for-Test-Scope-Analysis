@@ -19,7 +19,9 @@
     \node[memory, above right=1cm and -0.5cm of llm] (ltm) {\textbf{Long-Term}\\(RAG/Vector Store)};
     
     % Group Memory
-    \node[container={Memory Systems}, fit=(stm) (ltm)] (mem_box) {};
+    \begin{scope}[on background layer]
+        \node[container={Memory Systems}, fit=(stm) (ltm)] (mem_box) {};
+    \end{scope}
 
     % 3. Tools Module (Bottom)
     \node[tool, below=2cm of llm, minimum width=5cm] (tools) {\textbf{External Tools}\\(Search, Code Execution, API)};
