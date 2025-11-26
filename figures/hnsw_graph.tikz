@@ -1,0 +1,87 @@
+\begin{tikzpicture}[
+    font=\sffamily\scriptsize,
+    >=Stealth,
+    % --- Styles ---
+    layer/.style={fill=gray!5, draw=gray!30, rounded corners, inner sep=5pt},
+    node_pt/.style={circle, draw=black!70, fill=white, inner sep=1.5pt, minimum size=0.4cm},
+    entry_pt/.style={circle, draw=green!70, fill=green!10, inner sep=1.5pt, minimum size=0.4cm, font=\bfseries},
+    target_pt/.style={circle, draw=red!70, fill=red!10, inner sep=1.5pt, minimum size=0.4cm},
+    conn/.style={-, thin, gray!50},
+    path/.style={->, thick, blue},
+    layer_label/.style={anchor=south west, text=gray, font=\bfseries\tiny}
+]
+
+    % ==========================
+    % Layer 2 (Top - Sparse)
+    % ==========================
+    \begin{scope}[yshift=4cm, xshift=1cm, opacity=0.8]
+        \draw[layer] (-1, -1) rectangle (5, 1);
+        \node[layer_label] at (-1, 1) {Layer 2 (Entry)};
+        
+        \node[entry_pt] (L2_start) at (0, 0) {E};
+        \node[node_pt] (L2_A) at (4, 0.5) {};
+        
+        \draw[conn] (L2_start) -- (L2_A);
+        \draw[path] (L2_start) -- (L2_A);
+    \end{scope}
+
+    % ==========================
+    % Layer 1 (Middle)
+    % ==========================
+    \begin{scope}[yshift=2cm, opacity=0.9]
+        \draw[layer] (-1, -1) rectangle (5, 1);
+        \node[layer_label] at (-1, 1) {Layer 1};
+
+        % Projection from above
+        \node[node_pt] (L1_start) at (4, 0.5) {}; % Arrival from L2_A
+        \draw[dashed, gray] (L2_A) -- (L1_start);
+
+        \node[node_pt] (L1_B) at (2, -0.5) {};
+        \node[node_pt] (L1_C) at (3, 0) {};
+        
+        \draw[conn] (L1_start) -- (L1_C);
+        \draw[conn] (L1_C) -- (L1_B);
+        \draw[path] (L1_start) -- (L1_C);
+        \draw[path] (L1_C) -- (L1_B);
+    \end{scope}
+
+    % ==========================
+    % Layer 0 (Bottom - Dense)
+    % ==========================
+    \begin{scope}[yshift=0cm]
+        \draw[layer] (-1, -1) rectangle (5, 1);
+        \node[layer_label] at (-1, 1) {Layer 0 (Base Data)};
+
+        % Projection from above
+        \node[node_pt] (L0_start) at (2, -0.5) {}; % Arrival from L1_B
+        \draw[dashed, gray] (L1_B) -- (L0_start);
+
+        \node[node_pt] (L0_X) at (2.5, -0.2) {};
+        \node[target_pt] (target) at (3, -0.5) {T}; % Target
+        \node[node_pt] (L0_Y) at (1, 0) {};
+        
+        % Connections everywhere (Small World)
+        \draw[conn] (L0_start) -- (L0_X);
+        \draw[conn] (L0_X) -- (target);
+        \draw[conn] (target) -- (L0_Y);
+        \draw[conn] (L0_start) -- (L0_Y);
+
+        % Search Path
+        \draw[path] (L0_start) -- (L0_X);
+        \draw[path] (L0_X) -- (target);
+    \end{scope}
+
+    % ==========================
+    % Explanation
+    % ==========================
+    \node[align=left, anchor=west, font=\scriptsize] at (5.5, 2) {
+        \textbf{HNSW Search Process}\
+        1. \textbf{Zoom-in:} Start at top layer (sparse).\
+        2. \textbf{Greedy Search:} Move to neighbor closest to query.\
+        3. \textbf{Descend:} Drop to lower, denser layer.\
+        4. \textbf{Refine:} Repeat until Base Layer 0.\
+        \\
+        \textcolor{blue}{$\\rightarrow$ Search Path} ($O(\\log N)$)
+    };
+
+\end{tikzpicture}

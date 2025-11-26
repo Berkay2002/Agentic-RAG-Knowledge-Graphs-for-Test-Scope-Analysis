@@ -76,6 +76,13 @@ Central to the performance of Labeled Property Graphs, particularly for traversa
 \label{sec:ontologies}
 An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
 
+\begin{figure}[htbp]
+    \centering
+    \input{figures/kg_ontology.tikz}
+    \caption{A representative Knowledge Graph Ontology for Software Engineering, illustrating the semantic relationships (e.g., \texttt{verifies}, \texttt{calls}) between Requirements, Test Cases, Functions, and Classes.}
+    \label{fig:kg_ontology}
+\end{figure}
+
 \subsection{Graph Retrieval and Traversal}
 \label{sec:graph-retrieval}
 Retrieving information from a Knowledge Graph differs fundamentally from text retrieval. Instead of calculating similarity scores, it involves traversing the graph's structure to discover connections.
@@ -120,6 +127,13 @@ Dense retrieval operates on the semantic vector space created by embedding model
     \item \textbf{Weaknesses:} Struggles with precise keyword matching, rare entities, or specific technical identifiers (e.g., error codes like \texttt{0x8004}).
 \end{itemize}
 
+\begin{figure}[htbp]
+    \centering
+    \input{figures/embeddings_cosine.tikz}
+    \caption{Visualizing Embeddings and Cosine Similarity: Semantically similar terms (e.g., Login, Auth) have vectors with small angles $\theta$, while unrelated terms (e.g., Payment) have large angles $\phi$.}
+    \label{fig:embeddings_cosine}
+\end{figure}
+
 \subsubsection{Sparse Retrieval (Keyword Search)}
 In the context of software repositories, sparse retrieval is indispensable for locating exact string matches. Unlike natural language, source code relies on precise identifiers. A developer searching for a specific error constant (e.g., \texttt{ERR\_TIMEOUT\_503}) or a unique function signature requires an exact lexical match, which dense retrievers often fail to capture due to tokenization or semantic abstraction. The seminal approach to term weighting is TF-IDF (Term Frequency-Inverse Document Frequency) \cite{jones1972statistical}, which assigns higher importance to terms that appear frequently in a document but rarely across the entire collection. Building upon this, the industry standard algorithm is \textbf{BM25} (Best Matching 25), a probabilistic relevance framework that improves upon TF-IDF \cite{robertson2009probabilistic, robertson1994approximations}. Its scoring function for a document $d$ given a query $Q$ (composed of terms $q_1, \dots, q_n$) is:
 \[ \text{BM25Score}(d, Q) = \sum_{i=1}^{n} \text{IDF}(q_i) \cdot \frac{f(q_i, d) \cdot (k_1 + 1)}{f(q_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{\text{len}(d)}{\text{avgdl}}\right) } \]
@@ -140,6 +154,13 @@ For effective test scope analysis, the retrieval system must bridge the gap betw
 A challenge in combining these disparate results is \textbf{Score Fusion}, where combining raw scores from algorithms with different scales (e.g., Cosine similarity is 0-1, BM25 is unbounded) is non-trivial. Therefore, this thesis adopts \textbf{Reciprocal Rank Fusion (RRF)} \cite{cormack2009reciprocal} as the fusion mechanism. RRF is a robust, parameter-free method that sorts documents based on their rank rather than raw score:
 \[ RRFscore(d) = \sum_{r \in R} \frac{1}{k + r(d)} \]
 where $r(d)$ is the rank of document $d$ in result set $r$, and $k$ is a smoothing constant (typically 60). This ensures that documents appearing consistently high in both lists are prioritized, effectively bypassing the challenges of score normalization.
+
+\begin{figure}[htbp]
+    \centering
+    \input{figures/hybrid_search.tikz}
+    \caption{The Hybrid Search process: Parallel execution of Dense (Vector) and Sparse (Keyword) retrieval, followed by Reciprocal Rank Fusion (RRF) to merge and rank results.}
+    \label{fig:hybrid_search}
+\end{figure}
 
 
 \subsection{The RAG Pipeline Components}
@@ -162,6 +183,13 @@ Standard text splitting (e.g., every 500 characters) is detrimental in software 
     \item \textbf{Header-Based Splitting:} processing requirements documents by hierarchy (e.g., Section 1.2, 1.2.1), ensuring that the parent context (headers) is preserved with each child chunk.
 \end{itemize}
 
+\begin{figure}[htbp]
+    \centering
+    \input{figures/semantic_chunking.tikz}
+    \caption{Comparison of Fixed-Size vs. Semantic (Structure-Aware) Chunking. Semantic splitting respects code boundaries (classes, methods), preserving logical context that is often lost in arbitrary fixed-size splits.}
+    \label{fig:semantic_chunking}
+\end{figure}
+
 \subsubsection{Knowledge Stores}
 To effectively map the test scope, the storage layer must capture both the \textit{semantics} (meaning) and the \textit{structure} (dependencies) of the data.
 \begin{itemize}
@@ -174,6 +202,13 @@ To effectively map the test scope, the storage layer must capture both the \text
 Efficient retrieval from large vector indices relies on \textbf{Approximate Nearest Neighbor (ANN)} algorithms, which sacrifice a small amount of accuracy for significant gains in search speed. This thesis employs \textbf{Hierarchical Navigable Small Worlds (HNSW)} graphs \cite{malkov2018efficient} for vector search. It is important to note that the "graph" in HNSW refers to a specialized indexing structure used purely for accelerating vector similarity search. This is distinct from the semantic Knowledge Graphs (Section \ref{sec:knowledge-graphs}), which explicitly model relationships between entities. HNSW constructs a multi-layer graph where each layer is a navigable small-world graph. Queries start at the top layer (sparsest graph), quickly navigating to a local optimum, then descending to denser layers to refine the search. This hierarchical approach offers a logarithmic time complexity ($O(\log N)$) for search operations, balancing query speed with recall performance.
 
 \textbf{Connection to Integration:} HNSW is crucial for the \texttt{vector\_search()} tool (Section \ref{sec:tool-mediated-integration}) because it enables sub-second retrieval times over potentially massive code and documentation embeddings. This low-latency performance is a hard constraint for the agent's interactive Thought-Action-Observation loop, ensuring that semantic search steps do not introduce unacceptable delays in the test scope analysis process.
+
+\begin{figure}[htbp]
+    \centering
+    \input{figures/hnsw_graph.tikz}
+    \caption{Conceptual structure of the Hierarchical Navigable Small Worlds (HNSW) graph. The multi-layer architecture allows the search algorithm to quickly "zoom in" from the sparse top layer to the dense data layer, achieving logarithmic search complexity.}
+    \label{fig:hnsw_graph}
+\end{figure}
 
     \begin{figure}[htbp]
         \centering

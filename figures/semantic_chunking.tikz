@@ -1,0 +1,83 @@
+\begin{tikzpicture}[
+    font=\sffamily\footnotesize,
+    >=Stealth,
+    % --- Styles ---
+    codeblock/.style={rectangle, draw=gray!40, fill=white, align=left, font=\ttfamily\scriptsize, inner sep=4pt, minimum width=2.5cm},
+    chunk/.style={rectangle, draw=blue!40, fill=blue!5, rounded corners, inner sep=4pt, align=center},
+    badchunk/.style={rectangle, draw=red!40, fill=red!5, rounded corners, inner sep=4pt, align=center},
+    arrow/.style={->, thick, gray!60}
+]
+
+    % ==========================
+    % 1. Source Code Representation
+    % ==========================
+    \node[anchor=north] (source_title) at (0,0.5) {\textbf{Source File}};
+    \node[codeblock] (source) at (0, -1.5) {
+        class User {\\
+        \ \ void login() {\\
+        \ \ \ \ verify();\\
+        \ \ \ \ log();\\
+        \ \ \}\\
+        \ \ void logout() {\\
+        \ \ \ \ cleanup();\\
+        \ \ \}\\
+        }
+    };
+
+    % ==========================
+    % 2. Fixed-Size Chunking (Bad)
+    % ==========================
+    \node[anchor=north, text=red] (fixed_title) at (-4, 0.5) {\textbf{Fixed-Size Splitting}};
+    \node[anchor=north, text=gray, font=\scriptsize] at (-4, 0.1) {(e.g., every 50 chars)};
+
+    % Chunk 1 (Cuts in middle of function)
+    \node[badchunk, anchor=north] (f_chunk1) at (-4, -1) {
+        \textbf{Chunk 1}\\
+        \texttt{class User {}\\
+        \texttt{\ \ void login() {}\\
+        \texttt{\ \ \ \ verify();}
+    };
+
+    % Chunk 2 (Lost context)
+    \node[badchunk, below=0.3cm of f_chunk1] (f_chunk2) at (-4, -2.5) {
+        \textbf{Chunk 2}\\
+        \texttt{\ \ \ \ log();}\\
+        \texttt{\ \ \}\\
+        \texttt{\ \ void logout() }
+    };
+
+    \draw[arrow] (source) -- (f_chunk1.east);
+    \draw[arrow] (source) -- (f_chunk2.east);
+
+    % ==========================
+    % 3. Semantic Chunking (Good)
+    % ==========================
+    \node[anchor=north, text=blue] (semantic_title) at (4, 0.5) {\textbf{Semantic Splitting}};
+    \node[anchor=north, text=gray, font=\scriptsize] at (4, 0.1) {(AST / Structure-Aware)};
+
+    % Chunk 1 (Class + Method 1)
+    \node[chunk, anchor=north] (s_chunk1) at (4, -1) {
+        \textbf{Chunk 1: login()}\\
+        \textit{(Includes Parent Context)}\\
+        \texttt{class User > login()}\\
+        \texttt{\dots full method body \dots}
+    };
+
+    % Chunk 2 (Class + Method 2)
+    \node[chunk, below=0.3cm of s_chunk1] (s_chunk2) at (4, -3) {
+        \textbf{Chunk 2: logout()}\\
+        \textit{(Includes Parent Context)}\\
+        \texttt{class User > logout()}\\
+        \texttt{\dots full method body \dots}
+    };
+
+    \draw[arrow] (source) -- (s_chunk1.west);
+    \draw[arrow] (source) -- (s_chunk2.west);
+
+    % ==========================
+    % Annotations
+    % ==========================
+    \node[text=red, align=center, font=\scriptsize] at (-4, -4.5) {\faTimes\ \textbf{Context Lost}\\ "log()" is orphaned};
+    \node[text=blue, align=center, font=\scriptsize] at (4, -4.5) {\faCheck\ \textbf{Context Preserved}\\ Logical boundaries kept};
+
+\end{tikzpicture}
