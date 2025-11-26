@@ -12,7 +12,7 @@
 ]
 
     % 1. The Central Brain (LLM)
-    \node[brain] (llm) {\textbf{Large Language Model}\\(Reasoning & Planning)};
+    \node[brain] (llm) {\textbf{Large Language Model}\\(Reasoning \& Planning)};
 
     % 2. Memory Module (Top)
     \node[memory, above left=1cm and -0.5cm of llm] (stm) {\textbf{Short-Term}\\(Context)};

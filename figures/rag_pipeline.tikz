@@ -21,31 +21,31 @@
 
     % --- Processing Phase ---
     \node[block, colProcess, below=of sources] (chunks) {
-        \textbf{Chunking & Splitting}\\
+        \textbf{Chunking \& Splitting}\\
         \faCut\ \ Structure-Aware
     };
     
     \node[block, colProcess, below=of chunks] (embed) {
-        \textbf{Embedding & Extraction}\\
+        \textbf{Embedding \& Extraction}\\
         \faBrain\ \ Model + RE
     };
 
     % --- Storage Phase ---
-    % Vector Store (Left)
-    \node[block, colStore, below left=1.5cm and 0.2cm of embed] (vec_store) {
+    % Kept the increased distance (2.8cm) here to separate Ingestion from Storage
+    \node[block, colStore, below left=2.8cm and 0.2cm of embed] (vec_store) {
         \textbf{Vector Store}\\
         \faDatabase\ \ Embeddings
     };
     
     % Knowledge Graph (Right)
-    \node[block, colStore, below right=1.5cm and 0.2cm of embed] (graph_store) {
+    \node[block, colStore, below right=2.8cm and 0.2cm of embed] (graph_store) {
         \textbf{Knowledge Graph}\\
         \faProjectDiagram\ \ Entities/Relations
     };
 
     % --- Retrieval Phase (The "RAG" Loop) ---
-    % Position retrieval layer relative to vector store to ensure clearance
-    \node[block, colRetrieval, below=2cm of vec_store] (retrieval) at ($(vec_store)!0.5!(graph_store) + (0,-2.5cm)$) {
+    % FIXED: Increased offset from -1.5cm to -3.2cm to prevent container collision
+    \node[block, colRetrieval] (retrieval) at ($(vec_store)!0.5!(graph_store) + (0,-3.2cm)$) {
         \textbf{Hybrid Retrieval}\\
         \faSearch\ \ Vector + Graph
     };
@@ -62,8 +62,9 @@
     \draw[->, thick] (chunks) -- (embed);
     
     % Split to stores
-    \draw[->, thick] (embed) -- node[left, font=\footnotesize, pos=0.4] {Vectors} (vec_store);
-    \draw[->, thick] (embed) -- node[right, font=\footnotesize, pos=0.4] {Triples} (graph_store);
+    % Kept the white fill for labels so they are readable
+    \draw[->, thick] (embed) -- node[left, font=\footnotesize, pos=0.45, fill=white, inner sep=2pt] {Vectors} (vec_store);
+    \draw[->, thick] (embed) -- node[right, font=\footnotesize, pos=0.45, fill=white, inner sep=2pt] {Triples} (graph_store);
     
     % Retrieval flows
     \draw[->, thick] (query) -- (retrieval);
