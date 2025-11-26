@@ -1,0 +1,47 @@
+\begin{tikzpicture}[
+    node distance=1.5cm and 2cm,
+    font=\small\sffamily,
+    >=Stealth,
+    % Define styles
+    block/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, align=center, fill=white, thick},
+    source/.style={block, fill=violet!10},
+    process/.style={block, fill=yellow!10},
+    storage/.style={block, fill=blue!10},
+    container/.style={draw, dashed, inner sep=0.5cm, rounded corners, fill=gray!5, label={[anchor=north west, font=\footnotesize\bfseries, text=gray]north west:#1}}
+]
+
+    % Data Ingestion Sources
+    \node[source] (git) {\faGit\ Version Control};
+    \node[source, right=of git] (docs) {\faFilePdf\ Documentation};
+    \node[source, right=of docs] (jira) {\faBug\ Issue Trackers};
+
+    % Processing Layer
+    \node[process, below=1.5cm of $(git)!0.5!(jira)$] (loaders) {\faCogs\ Document Loaders};
+    \node[process, below=of loaders] (splitters) {\faCut\ Text Splitters\\(Structure-Aware)};
+    \node[process, below=of splitters] (embedding_model) {\faBrain\ Embedding Model};
+
+    % Knowledge Stores
+    \node[storage, below left=1.5cm and 1cm of embedding_model] (vector_index) {\faDatabase\ Vector Index\\(Semantic Search)};
+    \node[storage, below right=1.5cm and 1cm of embedding_model] (knowledge_graph) {\faProjectDiagram\ Knowledge Graph\\(Structural Relations)};
+
+    % Grouping Containers
+    \node[container={Data Ingestion}, fit=(git) (jira)] (sources_box) {};
+    \node[container={Processing Layer}, fit=(loaders) (embedding_model)] (processing_box) {};
+    \node[container={Knowledge Stores}, fit=(vector_index) (knowledge_graph)] (storage_box) {};
+
+    % Connections
+    \draw[->, thick] (git) -- (loaders);
+    \draw[->, thick] (docs) -- (loaders);
+    \draw[->, thick] (jira) -- (loaders);
+
+    \draw[->, thick] (loaders) -- (splitters);
+    \draw[->, thick] (splitters) -- (embedding_model);
+    
+    % Split for KG and Vector
+    \draw[->, thick] (splitters.south) -| node[above, pos=0.25, font=\footnotesize] {Entities & Relations} (knowledge_graph.north);
+    \draw[->, thick] (embedding_model.south) -| node[above, pos=0.25, font=\footnotesize] {Vectors} (vector_index.north);
+
+    % Implicit Retrieval (dashed for context)
+    \draw[->, thick, dashed, gray] (vector_index.south) -- ++(0,-1cm) -| node[below, pos=0.25, font=\footnotesize] {Retrieve Context} ($(vector_index)!0.5!(knowledge_graph)$) -| (knowledge_graph.south);
+    
+\end{tikzpicture}

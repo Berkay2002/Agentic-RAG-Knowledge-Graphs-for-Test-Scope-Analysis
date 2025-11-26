@@ -1,7 +1,7 @@
 \chapter{Theoretical Framework}
 \label{cha:theory}
 
-This chapter establishes the theoretical foundation for the agent-orchestrated Retrieval-Augmented Generation (RAG) and Knowledge Graph architecture developed in this thesis. It begins by grounding the problem in the context of modern software development practices and quality assurance, followed by an in-depth exploration of Large Language Models (LLMs), RAG, and AI Agents, including their constituent components and operational mechanisms.
+This chapter establishes the theoretical foundation for the agent-orchestrated Retrieval-Augmented Generation (RAG) and Knowledge Graph architecture developed in this thesis. It begins by grounding the problem in the context of modern software development practices and quality assurance, followed by an in-depth exploration of Large Language Models (LLMs), RAG, Knowledge Graphs, and AI Agents, including their constituent components and operational mechanisms.
 
 \section{Software Development Lifecycle \& Quality Assurance}
 \label{sec:sdlc-qa}
@@ -85,7 +85,31 @@ To effectively map the test scope, the storage layer must capture both the \text
     \item \textbf{Vector Indices:} Store the high-dimensional embeddings, enabling efficient similarity search (e.g., "Find tests related to authentication failures") \cite{johnson2017billion}.
     \item \textbf{Knowledge Graphs (KGs):} Explicitly model the relationships between entities (e.g., \texttt{Requirement-A} $\xrightarrow{verifies}$ \texttt{Test-B} $\xrightarrow{covers}$ \texttt{Function-C}) \cite{pan2024unifying}.
     \item \textbf{GraphRAG:} A hybrid approach where vector embeddings are stored as properties within the nodes of a Knowledge Graph \cite{edge2025localglobalgraphrag}. This allows for powerful composite queries: "Find all test cases that verify requirements semantically similar to 'Login Security' AND are linked to the 'AuthService' module."
+    \end{itemize}
+    
+    \begin{figure}[htbp]
+        \centering
+        \input{figures/rag_pipeline.tikz}
+        \caption{The Retrieval-Augmented Generation (RAG) Pipeline Architecture, showing data ingestion, processing, and storage components.}
+        \label{fig:rag_pipeline}
+    \end{figure}
+    
+    \section{Knowledge Graphs in Software Engineering}
+\label{sec:knowledge-graphs}
+
+Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
+
+\subsection{Graph Data Models: RDF vs. LPG}
+\label{sec:rdf-vs-lpg}
+Two primary data models exist for implementing Knowledge Graphs:
+\begin{itemize}
+    \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
+    \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
 \end{itemize}
+
+\subsection{Ontologies in Software Engineering}
+\label{sec:ontologies}
+An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
 
 \section{AI Agents}\label{sec:ai-agents}
 
@@ -137,22 +161,12 @@ Practical implementation relies on specific strategies to combat rot and maintai
     \item \textbf{Delimited Evidence:} Using clear XML-style tags (e.g., \texttt{<code\_snippet>}) to demarcate external data from internal logic, preventing the model from confusing retrieved evidence with system instructions.
 \end{itemize}
 
-\section{Knowledge Graphs in Software Engineering}
-\label{sec:knowledge-graphs}
-
-Knowledge Graphs (KGs) provide a structured way to represent complex, interconnected data, making them particularly suitable for modeling the dependencies in software systems \cite{pan2024unifying, kesri2021autokg}. Unlike vector stores, which capture semantic similarity, KGs capture explicit structural relationships.
-
-\subsection{Graph Data Models: RDF vs. LPG}
-\label{sec:rdf-vs-lpg}
-Two primary data models exist for implementing Knowledge Graphs:
-\begin{itemize}
-    \item \textbf{Resource Description Framework (RDF):} A W3C standard based on triples (Subject, Predicate, Object). RDF is ideal for semantic web applications and interoperability but can be verbose for traversing complex property-rich graphs typical in software engineering.
-    \item \textbf{Labeled Property Graphs (LPG):} Used by graph databases like Neo4j, LPGs allow nodes and relationships to have internal properties (key-value pairs). This model is often preferred in industry for software analytics because it allows for efficient storage of metadata (e.g., a "calls" relationship can have properties like \texttt{frequency} or \texttt{latency}). This thesis utilizes the LPG model to support the rich metadata requirements of test artifacts \cite{edge2025localglobalgraphrag}.
-\end{itemize}
-
-\subsection{Ontologies in Software Engineering}
-\label{sec:ontologies}
-An \textit{ontology} defines the schema or the "mental model" of the domain. In software engineering KGs, the ontology dictates the types of entities (e.g., \texttt{Class}, \texttt{Method}, \texttt{TestCase}, \texttt{Requirement}) and the allowed relationships between them (e.g., \texttt{inherits\_from}, \texttt{verifies}, \texttt{traces\_to}). A well-defined ontology is crucial for traversing the "semantic gap," allowing an agent to reason that if a \texttt{Requirement} is changed, the \texttt{TestCases} that \texttt{verify} it are candidates for regression testing \cite{antoniol2025recovering, radhakrishnan2023create}.
+\begin{figure}[htbp]
+    \centering
+    \input{figures/agent_architecture.tikz}
+    \caption{Architectural overview of an AI Agent, illustrating the interaction between the LLM "Brain," Memory systems, and External Tools via the ReAct cycle.}
+    \label{fig:agent_architecture}
+\end{figure}
 
 \section{Evaluation Metrics}
 \label{sec:evaluation-metrics}
