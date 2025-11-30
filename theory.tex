@@ -49,7 +49,11 @@ Despite these structural variations, the primary training objective remains \tex
 \label{sec:llm-capabilities}
 Beyond basic text generation, advanced LLMs exhibit significant capabilities relevant to agentic systems \cite{shen2024llmwithtools}:
 \begin{itemize}
-    \item \textbf{Reasoning:} LLMs can engage in various forms of reasoning, from simple fact retrieval to more complex logical deduction. Techniques like \textit{Chain-of-Thought (CoT)} prompting guide LLMs to break down complex problems into intermediate steps, making their reasoning process more transparent and accurate \cite{wei2022chainofthought}.
+    \item \textbf{Reasoning:} LLMs can engage in various forms of reasoning, from simple fact retrieval to complex logical deduction. This capability is enhanced through two primary paradigms:
+    \begin{itemize}
+        \item \textbf{Prompted Reasoning:} Techniques like \textit{Chain-of-Thought (CoT)} prompting guide standard models to break down problems into intermediate steps \cite{wei2022chainofthought}.
+        \item \textbf{Inference-Time Compute:} Recent "reasoning models" (e.g., DeepSeek-R1, OpenAI o1) employ Reinforcement Learning to internalize this "thinking" process. These models generate hidden chains of thought before producing an output, effectively trading increased inference latency for higher accuracy on complex tasks like dependency analysis.
+    \end{itemize}
     \item \textbf{Tool Use:} A critical emergent capability is the ability of LLMs to interact with external tools or APIs. By learning to generate structured outputs (e.g., JSON function calls) in response to prompts, LLMs can extend their functionalities beyond their training data, enabling them to perform calculations, query databases, or access real-time information.
 \end{itemize}
 
@@ -176,6 +180,8 @@ Document loaders are responsible for ingesting data from diverse software develo
 \end{itemize}
 These loaders normalize disparate data formats into a unified document structure suitable for processing.
 
+However, standard text extraction often fails for visually rich formats like PDF, where information is encoded in layout (e.g., tables, dual-column text) rather than linear character streams. To address this, \textbf{Document Layout Analysis (DLA)} is required. DLA involves using computer vision models (e.g., DocLayNet) to detect and classify layout elements (headers, paragraphs, tables) before extraction. This is critical for preserving the "structural context" of requirements and specifications, ensuring that a table cell containing a test parameter is explicitly linked to its column header rather than being flattened into a meaningless string of text.
+
 \subsubsection{Text Splitters (Semantic Chunking)}
 Standard text splitting (e.g., every 500 characters) is detrimental in software contexts where maintaining logical integrity is paramount, especially given the "lost-in-the-middle" phenomenon where LLMs struggle to recall information from the center of long contexts \cite{liu2023lost}. Instead, \textit{structure-aware splitting} strategies are employed:
 \begin{itemize}
@@ -272,6 +278,10 @@ GraphRAG, specifically the approach formalized by Edge et al. \cite{edge2025loca
 \end{itemize}
 In the context of test scope analysis, GraphRAG enables the retrieval system to "reason" about the software's structure, identifying test cases that are not textually similar to a code change but are structurally dependent on it.
 
+\subsection{Entity Linking and Grounding}
+\label{sec:entity-linking}
+A prerequisite for effective GraphRAG is \textbf{Entity Linking} (or Grounding). This is the process of mapping mentions of artifacts in unstructured text (e.g., user queries or bug reports) to their corresponding unique nodes within the Knowledge Graph. Without accurate linking, the system cannot locate the correct 'start nodes' for traversal, rendering the graph structure inaccessible. In agentic systems, this is often performed via hybrid search (using dense and sparse retrieval to find candidate nodes) or by leveraging the LLM's reasoning capabilities to disambiguate entity names before traversal \cite{shen2015entity}.
+
 \section{AI Agents}\label{sec:ai-agents}
 
 AI Agents represent a paradigm shift from simple LLM interactions to autonomous, goal-oriented systems. An AI Agent can be conceptualized as an \textbf{LLM equipped with Memory, Tools, Reasoning, and Planning capabilities}. This architecture enables agents to break down complex tasks, interact with their environment, and learn from feedback.
@@ -292,7 +302,8 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
         \item \textbf{Model-based Guardrails:} Utilize LLMs to evaluate the semantic quality of inputs and outputs. Techniques such as \textit{Constitutional AI} \cite{bai2022constitutionalaiharmlessnessai} use AI feedback to align models with safety principles, while specialized models like \textit{Llama Guard} \cite{inan2023llamaguardllmbasedinputoutput} classify content risks. In this system, model-based guardrails validate the reasoning behind test scope recommendations, ensuring the agent does not hallucinate connections between unrelated code modules.
     \end{itemize}
     Additionally, \textit{Human-in-the-loop (HITL)} mechanisms provide a critical layer of oversight for high-stakes actions, consistent with the interactive machine learning principles outlined by Amershi et al. \cite{Amershi_Cakmak_Knox_Kulesza_2014}. This architectural pattern involves pausing the agent's execution flow (interrupts) when a sensitive action is proposed. The system's state is persisted, allowing a human expert to review the request and exercise supervisory control by either \textit{approving} the action, \textit{editing} the parameters (e.g., refining a generated test case), or \textit{rejecting} the proposal entirely with feedback.
-\end{itemize}
+    
+    Agents also operate along a spectrum of autonomy, often categorized as \textbf{Human-in-the-Loop (HITL)} (where human approval is required for actions), \textbf{Human-on-the-Loop (HOTL)} (where humans supervise but intervene only in exceptions), and \textbf{Human-out-of-the-Loop} (full autonomy). For high-stakes software engineering tasks, navigating this spectrum is crucial: strictly enforcing HITL (e.g., "Safe Mode" in our implementation) ensures correctness during exploration, while allowing higher autonomy (e.g., "YOLO Mode") facilitates speed for trusted workflows.
 
 \subsection{Reasoning and Planning}
 \label{sec:reasoning-planning}
@@ -356,4 +367,6 @@ Since the system provides a recommended list of tests, the order of results is c
     \item \textbf{Recall@k:} Measures the proportion of relevant items retrieved within the top $k$ results (e.g., $k=10$). This is the primary safety metric, indicating the system's ability to surface correct tests within the user's immediate view.
     \item \textbf{Precision@k:} Measures the proportion of items in the top $k$ results that are actually relevant. High precision@k ensures that the user does not waste time reviewing irrelevant suggestions.
     \item \textbf{Mean Average Precision (MAP):} While Recall@k focuses on a specific cutoff, MAP provides a single-figure measure of quality across recall levels. It calculates the average precision at the position of every relevant item, rewarding systems that place relevant tests higher in the list. This metric is widely regarded as the standard for evaluating ranked retrieval systems \cite{manning2008introduction}.
+    \item \textbf{Mean Reciprocal Rank (MRR):} In agentic workflows, the system often acts on the \textit{first} relevant result found. MRR measures the average of the reciprocal ranks of the first relevant item for a set of queries ($1/\text{rank}$). An MRR of 1.0 implies the first result is always correct, which is ideal for autonomous agents.
+    \item \textbf{F1-Score (@k):} The harmonic mean of Precision@k and Recall@k. This metric is essential for balancing the trade-off between coverage and noise, ensuring the system does not achieve high recall simply by retrieving an excessive number of documents.
 \end{itemize}

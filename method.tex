@@ -1,56 +1,113 @@
-%%% lorem.tex --- 
-%% 
-%% Filename: lorem.tex
-%% Description: 
-%% Author: Ola Leifler
-%% Maintainer: 
-%% Created: Wed Nov 10 09:59:23 2010 (CET)
-%% Version: $Id$
-%% Version: 
-%% Last-Updated: Wed Nov 10 09:59:47 2010 (CET)
-%%           By: Ola Leifler
-%%     Update #: 2
-%% URL: 
-%% Keywords: 
-%% Compatibility: 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Commentary: 
-%% 
-%% 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Change log:
-%% 
-%% 
-%% RCS $Log$
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%%% Code:
-
 \chapter{Method}
 \label{cha:method}
 
-In this chapter, the method is described in a way which shows how the
-work was actually carried out. The description must be precise and
-well thought through. Consider the scientific term
-replicability. Replicability means that someone reading a scientific
-report should be able to follow the method description and then carry
-out the same study and check whether the results obtained are
-similar. Achieving replicability is not always relevant, but precision
-and clarity is.
+% Note on Tone:
+% This chapter is written in the "Descriptive of a Completed Artifact" tone.
+% It describes the system as it currently exists and functions, and the research/evaluation steps as events that have already occurred.
+% - Design/Development Actions: Past tense (e.g., "The system was designed...", "Strategies were implemented...")
+% - System Capabilities/Truths: Present tense (e.g., "The agent utilizes...", "Neo4j stores...")
+% - Evaluation Process: Past tense (e.g., "The performance was evaluated...", "We compared...")
+% This aligns with standard academic thesis writing where the "study" is treated as a completed event.
 
-Sometimes the work is separated into different parts, e.g.  pre-study,
-implementation and evaluation. In such cases it is recommended that
-the method chapter is structured accordingly with suitable named
-sub-headings.
+This chapter details the implementation of the agentic RAG system and the experimental methodology used to evaluate its effectiveness. The system was designed to answer the research questions by integrating a dual-storage architecture with an autonomous agent capable of dynamic retrieval strategy selection. The implementation is built using Python 3.11+, utilizing \texttt{LangChain} \cite{langchain} for agent orchestration, \texttt{Neo4j} \cite{neo4j} for graph storage, and \texttt{PostgreSQL} \cite{PostgreSQL} (with \texttt{pgvector} \cite{pgvector} and \texttt{pg_search} \cite{pg_search_paradedb}) for semantic and keyword retrieval.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% lorem.tex ends here
+\section{System Architecture}
+\label{sec:system-architecture}
+The system architecture follows a layered design, separating data storage, retrieval mechanisms, and agentic control logic.
 
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: "demothesis"
-%%% End: 
+\begin{itemize}
+    \item \textbf{Storage Layer:} Implements a "Dual Storage" pattern. Structural relationships (e.g., \texttt{TestCase} \textit{VERIFIES} \texttt{Requirement}) are stored in \textbf{Neo4j} (v5.20+) to enable graph traversal. Simultaneously, textual representations of these entities are stored in \textbf{PostgreSQL} (v15+), indexed both semantically (using \texttt{pgvector} HNSW indices) and lexically (using \texttt{pg_search} BM25 indices).
+    \item \textbf{Retrieval Layer:} Exposes four distinct tools that abstract the underlying storage complexities: \texttt{vector_search}, \texttt{keyword_search}, \texttt{graph_traverse}, and \texttt{hybrid_search}.
+    \item \textbf{Agent Layer:} A cognitive orchestration layer built on the \texttt{LangGraph} framework \cite{langchain}. It utilizes an LLM (configured as a ReAct agent) to dynamically select and chain these retrieval tools based on the user's query intent.
+\end{itemize}
+
+\section{Data Processing Pipeline}
+\label{sec:data-processing}
+To construct a comprehensive Knowledge Graph for test scope analysis, the system ingests data from three primary sources: unstructured documentation, source code repositories, and structured test execution logs.
+
+\subsection{Document Ingestion and Layout Analysis}
+\label{sec:doc-ingestion}
+Unstructured specifications (e.g., System Description Documents in PDF format) are processed using the \textbf{Docling} library \cite{Docling}. Unlike standard text extractors that flatten documents into a stream of characters, Docling employs \textbf{DocLayNet} \cite{Pfitzmann2022DocLayNetAL}, a multimodal AI model, to perform Document Layout Analysis (DLA). This ensures that structural elements such as section headers, tables, and lists are preserved. For tabular data, the \textbf{TableFormer} model \cite{yang-etal-2022-tableformer} is utilized to reconstruct table structures, preventing the loss of context often associated with PDF table extraction.
+
+\subsection{Code Analysis and AST Parsing}
+\label{sec:code-analysis}
+Source code ingestion addresses the "Semantic Gap" by avoiding arbitrary text splitting. The system utilizes \textbf{Tree-sitter} \cite{Brunsfeld2018TreeSitter} to parse the Abstract Syntax Tree (AST) of the codebase. This allows for "Structure-Aware Splitting," where code is chunked along functional boundaries (e.g., entire functions or classes) rather than fixed character counts. This ensures that each code embedding contains a semantically complete unit of logic, improving retrieval accuracy.
+
+\subsection{Test Data Ingestion (TGF Loader)}
+\label{sec:tgf-loader}
+A critical component of the pipeline is the \textbf{TGF (Test Governance Framework) Loader}, designed to ingest structured test execution data from Ericsson's internal systems. Implemented as the \texttt{TGFCSVLoader}, this component parses CSV exports containing metadata such as \texttt{test_id}, \texttt{result}, \texttt{execution_time}, and semicolon-separated lists of linked \texttt{requirement_ids} and \texttt{function_names}.
+The loader performs data normalization (e.g., mapping "passed"/"ok" to a standard "PASS" enum) and creates the ground truth relationships in the Knowledge Graph:
+\begin{itemize}
+    \item \texttt{TestCase} $\xrightarrow{VERIFIES}$ \texttt{Requirement}
+    \item \texttt{TestCase} $\xrightarrow{COVERS}$ \texttt{Function}
+\end{itemize}
+This structured data serves as the "Golden Standard" for evaluating the system's retrieval performance.
+
+\section{Retrieval Implementation (RQ2)}
+\label{sec:retrieval-implementation}
+To answer RQ2 ("How do different retrieval strategies compare?"), four distinct retrieval strategies were implemented as callable tools.
+
+\subsection{Vector and Keyword Search}
+\label{sec:vector-keyword-impl}
+\begin{itemize}
+    \item \textbf{Vector Search:} Implemented using \texttt{PostgreSQL} \cite{PostgreSQL} and \texttt{pgvector} \cite{pgvector}. It utilizes high-dimensional embeddings (768 dimensions, generated by models like OpenAI \texttt{text-embedding-3-small} or \texttt{Qwen}) stored in an HNSW (Hierarchical Navigable Small Worlds) index \cite{malkov2018efficient}. Similarity is calculated using \texttt{cosine distance}, enabling the retrieval of semantically related artifacts (e.g., finding "authentication tests" given a query about "login").
+    \item \textbf{Keyword Search:} Implemented using \texttt{PostgreSQL} Full Text Search configured with the \textbf{BM25} ranking algorithm \cite{robertson2009probabilistic}. This tool is optimized for exact identifier matching, essential for locating specific Error Codes (e.g., "E503") or precise Function Signatures that vector search might miss.
+\end{itemize}
+
+\subsection{Graph Traversal}
+\label{sec:graph-traverse-impl}
+The \texttt{graph_traverse} tool interacts with the Neo4j \cite{neo4j} database using parameterized Cypher queries \cite{francis2018cypher}. It requires a specific starting point (a `node_id`) and allows the agent to explore the neighborhood of that entity. The tool signature \texttt{graph_traverse(start_node, relationship_type, depth)} restricts the agent to valid traversals, preventing unbounded graph walks. This tool is the primary mechanism for answering structural queries (e.g., "What tests depend on this requirement?").
+
+\subsection{Hybrid Search and Fusion}
+\label{sec:hybrid-impl}
+The \texttt{hybrid_search} tool combines the results of vector and keyword searches using \textbf{Reciprocal Rank Fusion (RRF)} \cite{cormack2009reciprocal}. By normalizing the rank positions of documents from both retrieval lists (rather than their raw scores), RRF provides a robust single ranking that prioritizes items appearing prominently in both semantic and lexical results. This strategy is particularly effective for complex queries that contain both domain concepts and technical identifiers.
+
+\subsection{Agentic Orchestration}
+\label{sec:agent-orchestration}
+The agent is implemented using the \texttt{LangGraph} framework \cite{langchain} as a custom \texttt{StateGraph}. Its behavior is governed by a comprehensive \textbf{System Prompt} that explicitly defines a "Tool Selection Strategy." This prompt instructs the model to classify queries into four types:
+\begin{itemize}
+    \item \textbf{Type A (Specific ID):} "What tests cover REQ-123?" $\to$ Prioritize \texttt{keyword_search}.
+    \item \textbf{Type B (Conceptual):} "Tests for latency?" $\to$ Prioritize \texttt{vector_search}.
+    \item \textbf{Type C (Relationship):} "Dependencies of X?" $\to$ Prioritize \texttt{graph_traverse}.
+    \item \textbf{Type D (Complex):} "Login tests with timeouts?" $\to$ Prioritize \texttt{hybrid_search}.
+\end{itemize}
+Middleware components are integrated into the agent's execution graph to enforce operational constraints:
+\begin{itemize}
+    \item \textbf{ModelCallLimitMiddleware:} Enforces a strict limit (e.g., 10) on LLM inference calls to prevent infinite loops.
+    \item \textbf{ToolCallLimitMiddleware:} Limits the total number of tool executions per session.
+    \item \textbf{HumanInTheLoopMiddleware:} Intercepts tool execution requests (see Section \ref{sec:hitl-impl}).
+\end{itemize}
+
+\section{Human-in-the-Loop Implementation (RQ3)}
+\label{sec:hitl-impl}
+To address RQ3 regarding user control, the system implements a "Safe Mode" using \texttt{LangGraph}'s checkpointing mechanism (\texttt{PostgresSaver}) \cite{langchain}. Before executing any sensitive retrieval tool (Vector, Keyword, Graph, or Hybrid search), the \texttt{HumanInTheLoopMiddleware} interrupts the execution flow. The system state is persisted to the database, and the user is presented with the agent's proposed action (e.g., "I want to search for 'login' using vector_search"). The user can then \textbf{Approve} the action, \textbf{Edit} the tool parameters (e.g., changing the query), or \textbf{Reject} the action entirely. This allows for a "Human-on-the-Loop" workflow where the agent operates semi-autonomously under supervision.
+
+\section{Evaluation Methodology}
+\label{sec:evaluation-method}
+The system's performance was evaluated using a synthetic dataset derived from the TGF schema, simulating real-world telecommunications testing scenarios.
+
+\subsection{Dataset Generation}
+\label{sec:dataset-generation}
+A "Golden Standard" dataset was generated using the \texttt{synthetic_dataset.json} schema. This dataset contains a controlled set of Requirements, Functions, and Test Cases with explicitly defined links (e.g., `req_ids` and `function_names`). This explicit linking allows for the deterministic calculation of relevance: if the system retrieves `TC_001` for a query about `REQ_A`, it is counted as a "hit" only if the ground truth data explicitly links them.
+
+\subsection{Experimental Setup}
+\label{sec:experimental-setup}
+The evaluation compared the performance of five distinct strategies on a standard set of test scope queries:
+\begin{enumerate}
+    \item \textbf{Vector-Only:} Pure semantic search.
+    \item \textbf{Keyword-Only:} Pure BM25 search.
+    \item \textbf{Graph-Only:} Pure structural traversal (assuming a correct start node).
+    \item \textbf{Hybrid:} RRF fusion of Vector and Keyword.
+    \item \textbf{Agentic:} The dynamic orchestrator described in Section \ref{sec:agent-orchestration}.
+\end{enumerate}
+
+\subsection{Metrics Calculation}
+\label{sec:metrics-calc}
+Retrieval quality was quantified using standard Information Retrieval metrics \cite{manning2008introduction}, calculated via the \texttt{agrag.evaluation.metrics} module:
+\begin{itemize}
+    \item \textbf{Precision@k:} The fraction of relevant items in the top-$k$ results.
+    \item \textbf{Recall@k:} The fraction of total relevant items retrieved in the top-$k$.
+    \item \textbf{Mean Average Precision (MAP):} A rank-aware metric that averages the precision scores at the rank of each relevant document.
+    \item \textbf{Mean Reciprocal Rank (MRR):} The average of the multiplicative inverse of the rank of the first correct answer ($1/rank$).
+    \item \textbf{F1-Score@k:} The harmonic mean of Precision@k and Recall@k.
+\end{itemize}
