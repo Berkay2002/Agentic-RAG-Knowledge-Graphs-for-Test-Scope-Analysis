@@ -19,7 +19,7 @@ This chapter details the implementation of the agentic RAG system and the experi
 \toprule
 \textbf{Concept} & \textbf{Technology} & \textbf{Role in System} \\
 \midrule
-Agent Orchestration (\S\ref{sec:ai-agents}) & LangGraph & Manages agent state machine and tool execution flow \\
+Agent Orchestration (\S\ref{sec:ai-agents}) & LangChain \& LangGraph & Provides agent abstractions and state machine runtime \\
 Graph Database (\S\ref{sec:knowledge-graphs}) & Neo4j & Stores structural relationships between software artifacts \\
 Vector Search (\S\ref{sec:vector-search-hnsw}) & PostgreSQL + pgvector & Stores embeddings and performs HNSW-based similarity search \\
 Keyword Search (\S\ref{sec:text-retrieval-strategies}) & PostgreSQL + pg\_search & Provides BM25-based lexical retrieval \\
