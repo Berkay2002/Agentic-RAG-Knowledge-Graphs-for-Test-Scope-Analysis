@@ -9,15 +9,15 @@
 % - Evaluation Process: Past tense (e.g., "The performance was evaluated...", "We compared...")
 % This aligns with standard academic thesis writing where the "study" is treated as a completed event.
 
-This chapter details the implementation of the agentic RAG system and the experimental methodology used to evaluate its effectiveness. The system was designed to answer the research questions by integrating a dual-storage architecture with an autonomous agent capable of dynamic retrieval strategy selection. The implementation is built using Python 3.11+, utilizing \texttt{LangChain} \cite{langchain} for agent orchestration, \texttt{Neo4j} \cite{neo4j} for graph storage, and \texttt{PostgreSQL} \cite{PostgreSQL} (with \texttt{pgvector} \cite{pgvector} and \texttt{pg_search} \cite{pg_search_paradedb}) for semantic and keyword retrieval.
+This chapter details the implementation of the agentic RAG system and the experimental methodology used to evaluate its effectiveness. The system was designed to answer the research questions by integrating a dual-storage architecture with an autonomous agent capable of dynamic retrieval strategy selection. The implementation is built using Python 3.11+, utilizing \texttt{LangChain} \cite{langchain} for agent orchestration, \texttt{Neo4j} \cite{neo4j} for graph storage, and \texttt{PostgreSQL} \cite{PostgreSQL} (with \texttt{pgvector} \cite{pgvector} and \texttt{pg\_search} \cite{pg_search_paradedb}) for semantic and keyword retrieval.
 
 \section{System Architecture}
 \label{sec:system-architecture}
 The system architecture follows a layered design, separating data storage, retrieval mechanisms, and agentic control logic.
 
 \begin{itemize}
-    \item \textbf{Storage Layer:} Implements a "Dual Storage" pattern. Structural relationships (e.g., \texttt{TestCase} \textit{VERIFIES} \texttt{Requirement}) are stored in \textbf{Neo4j} (v5.20+) to enable graph traversal. Simultaneously, textual representations of these entities are stored in \textbf{PostgreSQL} (v15+), indexed both semantically (using \texttt{pgvector} HNSW indices) and lexically (using \texttt{pg_search} BM25 indices).
-    \item \textbf{Retrieval Layer:} Exposes four distinct tools that abstract the underlying storage complexities: \texttt{vector_search}, \texttt{keyword_search}, \texttt{graph_traverse}, and \texttt{hybrid_search}.
+    \item \textbf{Storage Layer:} Implements a "Dual Storage" pattern. Structural relationships (e.g., \texttt{TestCase} \textit{VERIFIES} \texttt{Requirement}) are stored in \textbf{Neo4j} (v5.20+) to enable graph traversal. Simultaneously, textual representations of these entities are stored in \textbf{PostgreSQL} (v15+), indexed both semantically (using \texttt{pgvector} HNSW indices) and lexically (using \texttt{pg\_search} BM25 indices).
+    \item \textbf{Retrieval Layer:} Exposes four distinct tools that abstract the underlying storage complexities: \texttt{vector\_search}, \texttt{keyword\_search}, \texttt{graph\_traverse}, and \texttt{hybrid\_search}.
     \item \textbf{Agent Layer:} A cognitive orchestration layer built on the \texttt{LangGraph} framework \cite{langchain}. It utilizes an LLM (configured as a ReAct agent) to dynamically select and chain these retrieval tools based on the user's query intent.
 \end{itemize}
 
@@ -35,7 +35,7 @@ Source code ingestion addresses the "Semantic Gap" by avoiding arbitrary text sp
 
 \subsection{Test Data Ingestion (TGF Loader)}
 \label{sec:tgf-loader}
-A critical component of the pipeline is the \textbf{TGF (Test Governance Framework) Loader}, designed to ingest structured test execution data from Ericsson's internal systems. Implemented as the \texttt{TGFCSVLoader}, this component parses CSV exports containing metadata such as \texttt{test_id}, \texttt{result}, \texttt{execution_time}, and semicolon-separated lists of linked \texttt{requirement_ids} and \texttt{function_names}.
+A critical component of the pipeline is the \textbf{TGF (Test Governance Framework) Loader}, designed to ingest structured test execution data from Ericsson's internal systems. Implemented as the \texttt{TGFCSVLoader}, this component parses CSV exports containing metadata such as \texttt{test\_id}, \texttt{result}, \texttt{execution\_time}, and semicolon-separated lists of linked \texttt{requirement\_ids} and \texttt{function\_names}.
 The loader performs data normalization (e.g., mapping "passed"/"ok" to a standard "PASS" enum) and creates the ground truth relationships in the Knowledge Graph:
 \begin{itemize}
     \item \texttt{TestCase} $\xrightarrow{VERIFIES}$ \texttt{Requirement}
@@ -56,20 +56,20 @@ To answer RQ2 ("How do different retrieval strategies compare?"), four distinct 
 
 \subsection{Graph Traversal}
 \label{sec:graph-traverse-impl}
-The \texttt{graph_traverse} tool interacts with the Neo4j \cite{neo4j} database using parameterized Cypher queries \cite{francis2018cypher}. It requires a specific starting point (a `node_id`) and allows the agent to explore the neighborhood of that entity. The tool signature \texttt{graph_traverse(start_node, relationship_type, depth)} restricts the agent to valid traversals, preventing unbounded graph walks. This tool is the primary mechanism for answering structural queries (e.g., "What tests depend on this requirement?").
+The \texttt{graph\_traverse} tool interacts with the Neo4j \cite{neo4j} database using parameterized Cypher queries \cite{francis2018cypher}. It requires a specific starting point (a \texttt{node\_id}) and allows the agent to explore the neighborhood of that entity. The tool signature \texttt{graph\_traverse(start\_node, relationship\_type, depth)} restricts the agent to valid traversals, preventing unbounded graph walks. This tool is the primary mechanism for answering structural queries (e.g., "What tests depend on this requirement?").
 
 \subsection{Hybrid Search and Fusion}
 \label{sec:hybrid-impl}
-The \texttt{hybrid_search} tool combines the results of vector and keyword searches using \textbf{Reciprocal Rank Fusion (RRF)} \cite{cormack2009reciprocal}. By normalizing the rank positions of documents from both retrieval lists (rather than their raw scores), RRF provides a robust single ranking that prioritizes items appearing prominently in both semantic and lexical results. This strategy is particularly effective for complex queries that contain both domain concepts and technical identifiers.
+The \texttt{hybrid\_search} tool combines the results of vector and keyword searches using \textbf{Reciprocal Rank Fusion (RRF)} \cite{cormack2009reciprocal}. By normalizing the rank positions of documents from both retrieval lists (rather than their raw scores), RRF provides a robust single ranking that prioritizes items appearing prominently in both semantic and lexical results. This strategy is particularly effective for complex queries that contain both domain concepts and technical identifiers.
 
 \subsection{Agentic Orchestration}
 \label{sec:agent-orchestration}
 The agent is implemented using the \texttt{LangGraph} framework \cite{langchain} as a custom \texttt{StateGraph}. Its behavior is governed by a comprehensive \textbf{System Prompt} that explicitly defines a "Tool Selection Strategy." This prompt instructs the model to classify queries into four types:
 \begin{itemize}
-    \item \textbf{Type A (Specific ID):} "What tests cover REQ-123?" $\to$ Prioritize \texttt{keyword_search}.
-    \item \textbf{Type B (Conceptual):} "Tests for latency?" $\to$ Prioritize \texttt{vector_search}.
-    \item \textbf{Type C (Relationship):} "Dependencies of X?" $\to$ Prioritize \texttt{graph_traverse}.
-    \item \textbf{Type D (Complex):} "Login tests with timeouts?" $\to$ Prioritize \texttt{hybrid_search}.
+    \item \textbf{Type A (Specific ID):} "What tests cover REQ-123?" $\to$ Prioritize \texttt{keyword\_search}.
+    \item \textbf{Type B (Conceptual):} "Tests for latency?" $\to$ Prioritize \texttt{vector\_search}.
+    \item \textbf{Type C (Relationship):} "Dependencies of X?" $\to$ Prioritize \texttt{graph\_traverse}.
+    \item \textbf{Type D (Complex):} "Login tests with timeouts?" $\to$ Prioritize \texttt{hybrid\_search}.
 \end{itemize}
 Middleware components are integrated into the agent's execution graph to enforce operational constraints:
 \begin{itemize}
@@ -88,7 +88,7 @@ The system's performance was evaluated using a synthetic dataset derived from th
 
 \subsection{Dataset Generation}
 \label{sec:dataset-generation}
-A "Golden Standard" dataset was generated using the \texttt{synthetic_dataset.json} schema. This dataset contains a controlled set of Requirements, Functions, and Test Cases with explicitly defined links (e.g., `req_ids` and `function_names`). This explicit linking allows for the deterministic calculation of relevance: if the system retrieves `TC_001` for a query about `REQ_A`, it is counted as a "hit" only if the ground truth data explicitly links them.
+A "Golden Standard" dataset was generated using the \texttt{synthetic\_dataset.json} schema. This dataset contains a controlled set of Requirements, Functions, and Test Cases with explicitly defined links (e.g., \texttt{req\_ids} and \texttt{function\_names}). This explicit linking allows for the deterministic calculation of relevance: if the system retrieves \texttt{TC\_001} for a query about \texttt{REQ\_A}, it is counted as a "hit" only if the ground truth data explicitly links them.
 
 \subsection{Experimental Setup}
 \label{sec:experimental-setup}
