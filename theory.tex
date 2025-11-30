@@ -304,6 +304,7 @@ AI Agents represent a paradigm shift from simple LLM interactions to autonomous,
     Additionally, \textit{Human-in-the-loop (HITL)} mechanisms provide a critical layer of oversight for high-stakes actions, consistent with the interactive machine learning principles outlined by Amershi et al. \cite{Amershi_Cakmak_Knox_Kulesza_2014}. This architectural pattern involves pausing the agent's execution flow (interrupts) when a sensitive action is proposed. The system's state is persisted, allowing a human expert to review the request and exercise supervisory control by either \textit{approving} the action, \textit{editing} the parameters (e.g., refining a generated test case), or \textit{rejecting} the proposal entirely with feedback.
     
     Agents also operate along a spectrum of autonomy, often categorized as \textbf{Human-in-the-Loop (HITL)} (where human approval is required for actions), \textbf{Human-on-the-Loop (HOTL)} (where humans supervise but intervene only in exceptions), and \textbf{Human-out-of-the-Loop} (full autonomy). For high-stakes software engineering tasks, navigating this spectrum is crucial: strictly enforcing HITL (e.g., "Safe Mode" in our implementation) ensures correctness during exploration, while allowing higher autonomy (e.g., "YOLO Mode") facilitates speed for trusted workflows.
+\end{itemize}
 
 \subsection{Reasoning and Planning}
 \label{sec:reasoning-planning}
