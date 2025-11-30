@@ -80,7 +80,7 @@ Middleware components are integrated into the agent's execution graph to enforce
 
 \section{Human-in-the-Loop Implementation (RQ3)}
 \label{sec:hitl-impl}
-To address RQ3 regarding user control, the system implements a "Safe Mode" using \texttt{LangGraph}'s checkpointing mechanism (\texttt{PostgresSaver}) \cite{langchain}. Before executing any sensitive retrieval tool (Vector, Keyword, Graph, or Hybrid search), the \texttt{HumanInTheLoopMiddleware} interrupts the execution flow. The system state is persisted to the database, and the user is presented with the agent's proposed action (e.g., "I want to search for 'login' using vector_search"). The user can then \textbf{Approve} the action, \textbf{Edit} the tool parameters (e.g., changing the query), or \textbf{Reject} the action entirely. This allows for a "Human-on-the-Loop" workflow where the agent operates semi-autonomously under supervision.
+To address RQ3 regarding user control, the system implements a ``Safe Mode'' using \texttt{LangGraph}'s checkpointing mechanism (\texttt{PostgresSaver}) \cite{langchain}. Before executing any sensitive retrieval tool (Vector, Keyword, Graph, or Hybrid search), the \texttt{HumanInTheLoopMiddleware} interrupts the execution flow. The system state is persisted to the database, and the user is presented with the agent's proposed action (e.g., ``I want to search for 'login' using vector\_search''). The user can then \textbf{Approve} the action, \textbf{Edit} the tool parameters (e.g., changing the query), or \textbf{Reject} the action entirely. This allows for a ``Human-on-the-Loop'' workflow where the agent operates semi-autonomously under supervision.
 
 \section{Evaluation Methodology}
 \label{sec:evaluation-method}
