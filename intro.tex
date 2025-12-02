@@ -60,7 +60,7 @@ To fulfill the aim, the following research questions have been formulated:
 
 \begin{itemize}
     \item \textbf{RQ1:} What ontology design is required to effectively map unstructured requirements to structured test artifacts within a Knowledge Graph to enable semantic retrieval?
-    \item \textbf{RQ2:} To what extent does an agent-orchestrated GraphRAG approach improve retrieval accuracy (measured by precision@k, recall@k, Mean Reciprocal Rank (MRR), and F1-score@k) compared to standard keyword-based and vector-only RAG methods?
+    \item \textbf{RQ2:} To what extent does an agent-orchestrated GraphRAG approach improve retrieval accuracy compared to standard keyword-based and vector-only RAG methods?
     \item \textbf{RQ3:} How do software practitioners perceive the explainability and practical utility of the automated test scope recommendations provided by the system?
 \end{itemize}
 
@@ -72,18 +72,6 @@ This study is delimited to the context of Ericsson’s internal software develop
     \item \textbf{Data Scope:} The study will utilize specific datasets provided by Ericsson, including structured test management data (requirements, trace links) and unstructured test case descriptions.
     \item \textbf{Evaluation Scope:} Performance evaluation is limited to offline metrics (precision@k, recall@k, MAP) and a qualitative human-in-the-loop utility study with a selected group of Ericsson engineers.
     \item \textbf{Functional Scope:} The system focuses exclusively on \textit{Test Scope Analysis} (identifying relevant existing tests) and does not include the automatic generation of new test cases or the execution of tests.
-\end{itemize}
-
-\subsection{Disposition}
-\label{sec:disposition}
-The remainder of this report is structured as follows:
-\begin{itemize}
-    \item \textbf{Theoretical Framework:} Presents the relevant theory concerning LLMs, RAG, Knowledge Graphs, and software testing methodologies.
-    \item \textbf{Method:} Describes the design science research methodology, the system architecture, and the evaluation metrics used.
-    \item \textbf{Implementation:} Details the data ingestion process, Knowledge Graph schema design, and the implementation of the hybrid retrieval agents.
-    \item \textbf{Results:} Presents the quantitative performance metrics from the comparative analysis and qualitative feedback from the practitioner user study.
-    \item \textbf{Discussion:} Analyzes the results in relation to the research questions and related work, discussing the implications for the field.
-    \item \textbf{Conclusion:} Summarizes the key findings and suggests directions for future research.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
