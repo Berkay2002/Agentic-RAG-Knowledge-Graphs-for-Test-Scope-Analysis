@@ -1,21 +1,28 @@
 \begin{ganttchart}[
-    vgrid, hgrid,
-    time slot format = isodate,
-    x unit = 0.15cm,
-    y unit chart = 0.7cm,
-    bar height = 0.6,
-    group label node/.append style={align=center},
-    bar label font=\normalsize,
-    milestone label font=\normalsize,
-    group label font=\normalsize\bfseries
+    vgrid={*1{draw=gray!20}},
+    hgrid={*1{draw=gray!15}},
+    time slot format=isodate,
+    x unit=0.19cm,
+    y unit chart=0.85cm,
+    y unit title=0.8cm,
+    bar height=0.55,
+    group label node/.append style={align=left, text width=3.8cm},
+    bar label font=\small,
+    bar label node/.append style={align=left, text width=3.8cm, anchor=east},
+    milestone label font=\small,
+    group label font=\small\bfseries,
+    title label font=\small\bfseries
 ]{2026-02-09}{2026-07-05}
 
     \ganttset{
-        canvas/.style={fill=blue!10},
-        milestone/.append style={fill=red!50},
-        bar/.append style={fill=green!50},
-        group/.append style={fill=gray!20}
+        canvas/.style={fill=gray!5, draw=gray!25},
+        milestone/.append style={fill=orange!75, draw=orange!90},
+        bar/.append style={fill=blue!35, draw=blue!60, rounded corners=2pt},
+        group/.append style={fill=gray!30, draw=gray!60, rounded corners=2pt},
+        link/.style={->, line width=0.7pt, draw=gray!60}
     }
+
+    \gantttitlecalendar{month=name, week} \\
 
     % Phase 1: Foundation
     \ganttgroup{Phase 1: Foundation \& Infra}{2026-02-09}{2026-02-22} \\
