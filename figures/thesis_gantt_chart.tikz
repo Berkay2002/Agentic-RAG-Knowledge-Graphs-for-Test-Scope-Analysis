@@ -13,34 +13,33 @@
     \ganttset{
         canvas/.style={fill=blue!10},
         milestone/.append style={fill=red!50},
-        task/.append style={fill=green!50},
-        group/.append style={fill=gray!20},
-        progress/.append style={fill=green!30}
+        bar/.append style={fill=green!50},
+        group/.append style={fill=gray!20}
     }
 
     % Phase 1: Foundation
     \ganttgroup{Phase 1: Foundation \& Infra}{2026-02-09}{2026-02-22} \\
-    \gantttask[name=env]{Env Setup \& Base Code}{2026-02-09}{2026-02-15} \\
-    \gantttask[name=core]{Core Data Structures}{2026-02-16}{2026-02-22} \\
+    \ganttbar[name=env]{Env Setup \& Base Code}{2026-02-09}{2026-02-15} \\
+    \ganttbar[name=core]{Core Data Structures}{2026-02-16}{2026-02-22} \\
 
     % Phase 2: Core Dev
     \ganttgroup{Phase 2: Agentic RAG/KG Dev}{2026-02-23}{2026-03-22} \\
-    \gantttask[name=kg]{KG Design \& Pop.}{2026-02-23}{2026-03-08} \\
-    \gantttask[name=agent]{Agent Orchestration}{2026-03-09}{2026-03-22} \\
+    \ganttbar[name=kg]{KG Design \& Pop.}{2026-02-23}{2026-03-08} \\
+    \ganttbar[name=agent]{Agent Orchestration}{2026-03-09}{2026-03-22} \\
 
     % Phase 3: Ingestion
     \ganttgroup{Phase 3: Data Ingestion}{2026-03-23}{2026-04-19} \\
-    \gantttask[name=data]{Data Adapt. \& Pipelines}{2026-03-23}{2026-04-19} \\
+    \ganttbar[name=data]{Data Adapt. \& Pipelines}{2026-03-23}{2026-04-19} \\
 
     % Phase 4: Eval
     \ganttgroup{Phase 4: Evaluation \& Opt}{2026-04-20}{2026-05-31} \\
-    \gantttask[name=exp]{Experiments \& Analysis}{2026-04-20}{2026-05-17} \\
-    \gantttask[name=opt]{Optimization Loop}{2026-05-18}{2026-05-31} \\
+    \ganttbar[name=exp]{Experiments \& Analysis}{2026-04-20}{2026-05-17} \\
+    \ganttbar[name=opt]{Optimization Loop}{2026-05-18}{2026-05-31} \\
 
     % Phase 5: Writing
     \ganttgroup{Phase 5: Writing}{2026-06-01}{2026-06-28} \\
-    \gantttask[name=write]{Thesis Writing}{2026-06-01}{2026-06-21} \\
-    \gantttask[name=review]{Final Review}{2026-06-22}{2026-06-28} \\
+    \ganttbar[name=write]{Thesis Writing}{2026-06-01}{2026-06-21} \\
+    \ganttbar[name=review]{Final Review}{2026-06-22}{2026-06-28} \\
     \ganttmilestone[name=sub]{Target Submission}{2026-06-30}
 
     % Links
