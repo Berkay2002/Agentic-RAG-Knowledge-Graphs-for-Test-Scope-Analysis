@@ -1,0 +1,63 @@
+\documentclass{standalone}
+\usepackage{pgfgantt}
+\usepackage{xcolor}
+
+\begin{document}
+
+\begin{ganttchart}[
+    vgrid, hgrid,
+    time slot format = isodate,
+    time slot unit = week,
+    x unit = 0.45cm,
+    y unit = 0.7cm,
+    bar height = 0.6,
+    group label node/.append style={align=center},
+    bar label font=\normalsize,
+    milestone label font=\normalsize,
+    group label font=\normalsize\bfseries
+]{2026-02-09}{2026-07-05} % Chart range covering the planned completion
+
+    \ganttset{
+        canvas/.style={fill=blue!10},
+        milestone/.append style={fill=red!50},
+        task/.append style={fill=green!50},
+        group/.append style={fill=gray!20},
+        progress/.append style={fill=green!30}
+    }
+
+    % Phase 1: Foundation (2 Weeks)
+    \ganttgroup{Phase 1: Foundation \& Infra}{2026-02-09}{2026-02-22}
+    \gantttask{Env Setup \& Base Code}{2026-02-09}{2026-02-15}
+    \gantttask{Core Data Structures}{2026-02-16}{2026-02-22}
+
+    % Phase 2: Core Dev (4 Weeks)
+    \ganttgroup{Phase 2: Agentic RAG/KG Dev}{2026-02-23}{2026-03-22}
+    \gantttask{KG Design \& Pop.}{2026-02-23}{2026-03-08}
+    \gantttask{Agent Orchestration}{2026-03-09}{2026-03-22}
+
+    % Phase 3: Ingestion (4 Weeks)
+    \ganttgroup{Phase 3: Data Ingestion (Ericsson)}{2026-03-23}{2026-04-19}
+    \gantttask{Data Adapt. \& Pipelines}{2026-03-23}{2026-04-19}
+
+    % Phase 4: Eval (6 Weeks - Finishing Tech work by end of May)
+    \ganttgroup{Phase 4: Evaluation \& Opt}{2026-04-20}{2026-05-31}
+    \gantttask{Experiments \& Analysis}{2026-04-20}{2026-05-17}
+    \gantttask{Optimization Loop}{2026-05-18}{2026-05-31}
+
+    % Phase 5: Writing (June)
+    \ganttgroup{Phase 5: Writing \& Finalization}{2026-06-01}{2026-06-28}
+    \gantttask{Thesis Writing}{2026-06-01}{2026-06-21}
+    \gantttask{Final Review}{2026-06-22}{2026-06-28}
+    \ganttmilestone{Target Submission}{2026-06-30}
+
+    % Links
+    \ganttlink{Core Data Structures}{KG Design \& Pop.}
+    \ganttlink{Agent Orchestration}{Data Adapt. \& Pipelines}
+    \ganttlink{Data Adapt. \& Pipelines}{Experiments \& Analysis}
+    \ganttlink{Optimization Loop}{Thesis Writing}
+    \ganttlink{Thesis Writing}{Final Review}
+    \ganttlink{Final Review}{Target Submission}
+
+\end{ganttchart}
+
+\end{document}
