@@ -1,0 +1,28 @@
+\chapter*{Executive Summary (Course Submission Note)}
+\addcontentsline{toc}{chapter}{Executive Summary}
+
+This 1--2 page executive summary satisfies the methodology-course requirement (6--8 pages) while preserving the full thesis manuscript that follows. It distills the aim, research questions, theoretical grounding, method, and schedule; the complete chapters remain unchanged for the final thesis.
+
+\textbf{Aim.} Deliver an agentic Retrieval-Augmented Generation (RAG) system that combines a knowledge graph and vector search to improve test scope analysis in large telecom codebases.
+
+\textbf{Research questions.}
+\begin{itemize}
+    \item RQ1: How can a dual-storage architecture (graph + vector) improve retrieval of test cases, requirements, and code artifacts for scope analysis?
+    \item RQ2: How effectively can an agent dynamically choose among vector, keyword, graph, and hybrid search for heterogeneous queries?
+    \item RQ3: How does the agentic approach compare to single-strategy baselines (vector-only, keyword-only, graph-only, hybrid) on precision/recall-oriented metrics?
+\end{itemize}
+
+\textbf{Theoretical frame (condensed).} The work draws on (a) software testing and regression/test-impact analysis, (b) RAG and hybrid retrieval (dense + sparse), (c) knowledge graphs for software traceability, and (d) agentic ReAct-style tool orchestration with guardrails and HITL. The full literature review with citations is in Chapters~\ref{cha:theory} and \ref{cha:method}; this summary does not repeat all references.
+
+\textbf{Method overview.}
+\begin{itemize}
+    \item \emph{Data ingestion:} PDF/markdown/docs (layout-aware extraction), source code (AST-aware splitting), and structured TGF exports for requirements/tests/functions with explicit trace links.
+    \item \emph{Storage:} Neo4j knowledge graph for structural relations; PostgreSQL+pgvector for embeddings; pg\_search for BM25 keyword search.
+    \item \emph{Retrieval tools:} \texttt{vector\_search}, \texttt{keyword\_search}, \texttt{graph\_traverse}, and \texttt{hybrid\_search} with Reciprocal Rank Fusion.
+    \item \emph{Agent orchestration:} ReAct-style LLM agent performs intent recognition, selects tools, enforces call limits, and supports human-in-the-loop interrupts for sensitive actions.
+    \item \emph{Evaluation:} Synthetic TGF-derived golden set; compare five strategies (vector, keyword, graph, hybrid, agentic) on Precision@k, Recall@k, MAP, MRR, F1@k.
+\end{itemize}
+
+\textbf{Timeline.} A weekly plan with major milestones (foundation, KG/RAG development, ingestion, evaluation, writing) is provided in Chapter~\ref{cha:time-plan}; see the Gantt in Figure~\ref{fig:gantt}. The schedule targets technical completion by end of May 2026 and thesis submission by end of June 2026.
+
+\textbf{Submission note.} For the methodology course, assess this executive summary against the 6--8 page guidance; the remaining pages constitute the full thesis manuscript for the degree submission.
