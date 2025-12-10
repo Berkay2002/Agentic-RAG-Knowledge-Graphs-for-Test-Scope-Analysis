@@ -48,7 +48,7 @@ To construct a comprehensive Knowledge Graph for test scope analysis, the system
 \label{sec:doc-ingestion}
 A key challenge in processing technical documentation is that standard PDF extractors flatten visual layouts into plain text streams, losing critical structural information such as section hierarchies and table relationships. To address this, the system employs Document Layout Analysis (DLA), as introduced in Section~\ref{sec:rag-pipeline}.
 
-The implementation uses an open-source document conversion library \cite{Docling} that internally applies a multimodal vision model \cite{Pfitzmann2022DocLayNetAL} to detect and classify layout elements (headers, paragraphs, tables, lists) before extraction. For tables---which are particularly problematic in PDF formats---a specialized table structure recognition model \cite{yang-etal-2022-tableformer} reconstructs cell relationships, ensuring that a test parameter value remains linked to its column header rather than being extracted as disconnected text.
+The implementation uses an open-source document conversion library \cite{Docling} that internally applies a multimodal vision model \cite{Pfitzmann2022DocLayNetAL} to detect and classify layout elements (headers, paragraphs, tables, lists) before extraction. For tables, which are particularly problematic in PDF formats, a specialized table structure recognition model \cite{yang-etal-2022-tableformer} reconstructs cell relationships, ensuring that a test parameter value remains linked to its column header rather than being extracted as disconnected text.
 
 \subsection{Code Analysis and AST Parsing}
 \label{sec:code-analysis}
@@ -58,7 +58,7 @@ The implementation uses an incremental parsing library \cite{Brunsfeld2018TreeSi
 
 \subsection{Test Data Ingestion}
 \label{sec:tgf-loader}
-The third data source is structured test execution metadata from the organization's test management systems. In this study, this data originates from Ericsson's internal Test Governance Framework (TGF), which exports test results as CSV files containing fields such as test identifiers, execution outcomes, timestamps, and---crucially---explicit links to requirements and code functions.
+The third data source is structured test execution metadata from the organization's test management systems. In this study, this data originates from Ericsson's internal Test Governance Framework (TGF), which exports test results as CSV files containing fields such as test identifiers, execution outcomes, timestamps, and, crucially, explicit links to requirements and code functions.
 
 A dedicated loader component parses these exports, performing data normalization (e.g., mapping variant result strings like ``passed'' or ``ok'' to a canonical ``PASS'' status) and creating the ground-truth relationships in the Knowledge Graph:
 \begin{itemize}
@@ -75,12 +75,12 @@ To enable a comparative analysis of retrieval strategies, four distinct retrieva
 \label{sec:vector-keyword-impl}
 \begin{itemize}
     \item \textbf{Vector Search:} Semantic retrieval is implemented using a relational database extended with vector operations \cite{pgvector}. Document embeddings (768 dimensions) are stored in an HNSW index, as described in Section~\ref{sec:vector-search-hnsw}, enabling sub-second approximate nearest-neighbor queries using cosine distance.
-    \item \textbf{Keyword Search:} Lexical retrieval uses the BM25 algorithm \cite{robertson2009probabilistic} via a full-text search extension \cite{pg_search_paradedb}. This tool is optimized for exact identifier matching---essential for locating specific error codes (e.g., \texttt{ERR\_TIMEOUT\_503}) or function signatures that semantic search might miss due to tokenization issues.
+    \item \textbf{Keyword Search:} Lexical retrieval uses the BM25 algorithm \cite{robertson2009probabilistic} via a full-text search extension \cite{pg_search_paradedb}. This tool is optimized for exact identifier matching, essential for locating specific error codes (e.g., \texttt{ERR\_TIMEOUT\_503}) or function signatures that semantic search might miss due to tokenization issues.
 \end{itemize}
 
 \subsection{Graph Traversal}
 \label{sec:graph-traverse-impl}
-The \texttt{graph\_traverse} tool queries the Knowledge Graph using parameterized pattern-matching queries (see Section~\ref{sec:graph-retrieval}). It requires a specific starting point (a node identifier) and allows the agent to explore that entity's neighborhood. The tool's interface---\texttt{graph\_traverse(start\_node, relationship\_type, depth)}---constrains the agent to valid traversals, preventing unbounded graph walks that could degrade performance. This tool is the primary mechanism for answering structural queries such as ``which tests verify requirement X?''
+The \texttt{graph\_traverse} tool queries the Knowledge Graph using parameterized pattern-matching queries (see Section~\ref{sec:graph-retrieval}). It requires a specific starting point (a node identifier) and allows the agent to explore that entity's neighborhood. The tool's interface, \texttt{graph\_traverse(start\_node, relationship\_type, depth)}, constrains the agent to valid traversals, preventing unbounded graph walks that could degrade performance. This tool is the primary mechanism for answering structural queries such as ``which tests verify requirement X?''
 
 \subsection{Hybrid Search and Fusion}
 \label{sec:hybrid-impl}
@@ -103,7 +103,7 @@ To ensure reliable operation, the agent incorporates several guardrail mechanism
 
 \section{Human-in-the-Loop Implementation}
 \label{sec:hitl-impl}
-To enable user control and oversight, the system implements a ``Safe Mode'' following the Human-in-the-Loop (HITL) principles described in Section~\ref{sec:agent-components}. When enabled, the agent's execution is interrupted before any retrieval tool is invoked. The current state---including conversation history and the proposed action---is persisted to the database, allowing the session to be resumed later.
+To enable user control and oversight, the system implements a ``Safe Mode'' following the Human-in-the-Loop (HITL) principles described in Section~\ref{sec:agent-components}. When enabled, the agent's execution is interrupted before any retrieval tool is invoked. The current state, including conversation history and the proposed action, is persisted to the database, allowing the session to be resumed later.
 
 At each interrupt, the user is presented with the agent's proposed action and can:
 \begin{itemize}
