@@ -280,7 +280,7 @@ In the context of test scope analysis, GraphRAG enables the retrieval system to 
 
 \subsection{Entity Linking and Grounding}
 \label{sec:entity-linking}
-A prerequisite for effective GraphRAG is \textbf{Entity Linking} (or Grounding). This is the process of mapping mentions of artifacts in unstructured text (e.g., user queries or bug reports) to their corresponding unique nodes within the Knowledge Graph. Without accurate linking, the system cannot locate the correct 'start nodes' for traversal, rendering the graph structure inaccessible. In agentic systems, this is often performed via hybrid search (using dense and sparse retrieval to find candidate nodes) or by leveraging the LLM's reasoning capabilities to disambiguate entity names before traversal.
+A prerequisite for effective GraphRAG is \textbf{Entity Linking} (or Grounding). This is the process of mapping mentions of artifacts in unstructured text (e.g., user queries or bug reports) to their corresponding unique nodes within the Knowledge Graph. Without accurate linking, the system cannot locate the correct 'start nodes' for traversal, rendering the graph structure inaccessible. In agentic systems, this is often performed via hybrid search (using dense and sparse retrieval to find candidate nodes) or by leveraging the LLM's reasoning capabilities to disambiguate entity names before traversal \cite{almoslmi2020namedentity}.
 
 \section{AI Agents}\label{sec:ai-agents}
 
