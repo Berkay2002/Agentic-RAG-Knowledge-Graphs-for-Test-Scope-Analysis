@@ -32,7 +32,7 @@ Hybrid Fusion (\S\ref{sec:text-retrieval-strategies}) & Reciprocal Rank Fusion &
 
 \section{System Architecture}
 \label{sec:system-architecture}
-The system architecture follows a layered design, separating data storage, retrieval mechanisms, and agentic control logic (see Figure~\ref{fig:system-layers}).
+The system architecture follows a layered design, separating data storage, retrieval mechanisms, and agentic control logic.
 
 \begin{itemize}
     \item \textbf{Storage Layer:} Implements a ``Dual Storage'' pattern that separates \textit{structural} and \textit{semantic} concerns. A graph database stores explicit relationships between software artifacts (e.g., \texttt{TestCase} $\xrightarrow{VERIFIES}$ \texttt{Requirement}), enabling the structural traversal described in Section~\ref{sec:graph-retrieval}. A relational database with vector and full-text extensions stores textual representations of these entities, indexed for both semantic similarity and keyword matching.
